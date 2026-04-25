@@ -1,0 +1,254 @@
+/* ============================================================
+   MediConnect Design Tokens
+   OKLCH-based palette — teal medical brand
+   4px base unit, 4-step elevation, Inter Variable UI font
+   ============================================================ */
+
+/* ── Fonts ─────────────────────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@import "tailwindcss";
+
+/* ── Light Theme (default) ──────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  /* Brand — teal */
+  --color-brand-50:  oklch(97% 0.02 195);
+  --color-brand-100: oklch(93% 0.05 195);
+  --color-brand-200: oklch(87% 0.09 195);
+  --color-brand-300: oklch(78% 0.13 195);
+  --color-brand-400: oklch(68% 0.16 195);
+  --color-brand-500: oklch(58% 0.18 195);
+  --color-brand-600: oklch(48% 0.16 195);
+  --color-brand-700: oklch(38% 0.13 195);
+
+  /* Semantic */
+  --color-success:   oklch(60% 0.17 145);
+  --color-warning:   oklch(72% 0.18 75);
+  --color-danger:    oklch(58% 0.22 25);
+  --color-info:      oklch(60% 0.16 240);
+
+  /* Vital-specific */
+  --color-vital-ok:   oklch(60% 0.17 145);
+  --color-vital-mild: oklch(72% 0.18 75);
+  --color-vital-bad:  oklch(58% 0.22 25);
+
+  /* Neutral */
+  --color-neutral-0:   oklch(100% 0 0);
+  --color-neutral-50:  oklch(98% 0.003 240);
+  --color-neutral-100: oklch(96% 0.005 240);
+  --color-neutral-200: oklch(91% 0.007 240);
+  --color-neutral-300: oklch(83% 0.009 240);
+  --color-neutral-400: oklch(71% 0.010 240);
+  --color-neutral-500: oklch(58% 0.010 240);
+  --color-neutral-600: oklch(46% 0.010 240);
+  --color-neutral-700: oklch(36% 0.010 240);
+  --color-neutral-800: oklch(26% 0.008 240);
+  --color-neutral-900: oklch(16% 0.006 240);
+  --color-neutral-950: oklch(10% 0.004 240);
+
+  /* Semantic aliases */
+  --color-background:        var(--color-neutral-50);
+  --color-surface:           var(--color-neutral-0);
+  --color-surface-raised:    var(--color-neutral-0);
+  --color-surface-overlay:   var(--color-neutral-0);
+  --color-border:            var(--color-neutral-200);
+  --color-border-strong:     var(--color-neutral-300);
+  --color-text-primary:      var(--color-neutral-900);
+  --color-text-secondary:    var(--color-neutral-600);
+  --color-text-disabled:     var(--color-neutral-400);
+  --color-text-inverse:      var(--color-neutral-0);
+  --color-text-on-brand:     var(--color-neutral-0);
+  --color-accent:            var(--color-brand-500);
+  --color-accent-hover:      var(--color-brand-600);
+  --color-accent-active:     var(--color-brand-700);
+  --color-accent-subtle:     var(--color-brand-50);
+  --color-focus-ring:        var(--color-brand-500);
+
+  /* Typography */
+  --font-ui:    "Inter", system-ui, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, serif;
+  --font-mono:  "JetBrains Mono", "Fira Code", monospace;
+
+  --font-size-xs:   0.75rem;   /* 12px */
+  --font-size-sm:   0.875rem;  /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg:   1.125rem;  /* 18px */
+  --font-size-xl:   1.25rem;   /* 20px */
+  --font-size-2xl:  1.5rem;    /* 24px */
+  --font-size-3xl:  1.875rem;  /* 30px */
+  --font-size-4xl:  2.25rem;   /* 36px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium:  500;
+  --font-weight-semibold:600;
+  --font-weight-bold:    700;
+
+  --line-height-tight:  1.25;
+  --line-height-snug:   1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed:1.625;
+
+  /* Spacing — 4px base unit */
+  --space-0:  0px;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Elevation (4-step) */
+  --shadow-elev-0: none;
+  --shadow-elev-1: 0 1px 3px oklch(0% 0 0 / 0.08), 0 1px 2px oklch(0% 0 0 / 0.06);
+  --shadow-elev-2: 0 4px 6px oklch(0% 0 0 / 0.07), 0 2px 4px oklch(0% 0 0 / 0.05);
+  --shadow-elev-3: 0 10px 20px oklch(0% 0 0 / 0.10), 0 4px 8px oklch(0% 0 0 / 0.07);
+
+  /* Motion */
+  --duration-fast:   100ms;
+  --duration-normal: 200ms;
+  --duration-layout: 320ms;
+  --ease-default:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:         cubic-bezier(0.4, 0, 1, 1);
+  --ease-out:        cubic-bezier(0, 0, 0.2, 1);
+
+  /* Layout */
+  --sidebar-width:      240px;
+  --sidebar-width-collapsed: 64px;
+  --topbar-height:      60px;
+  --content-max-width:  1280px;
+}
+
+/* ── Dark Theme ─────────────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+
+  --color-background:        oklch(13% 0.008 240);
+  --color-surface:           oklch(18% 0.008 240);
+  --color-surface-raised:    oklch(22% 0.008 240);
+  --color-surface-overlay:   oklch(26% 0.008 240);
+  --color-border:            oklch(30% 0.008 240);
+  --color-border-strong:     oklch(38% 0.008 240);
+  --color-text-primary:      oklch(95% 0.003 240);
+  --color-text-secondary:    oklch(72% 0.006 240);
+  --color-text-disabled:     oklch(48% 0.006 240);
+  --color-text-inverse:      oklch(10% 0.004 240);
+  --color-text-on-brand:     oklch(100% 0 0);
+  --color-accent:            var(--color-brand-400);
+  --color-accent-hover:      var(--color-brand-300);
+  --color-accent-active:     var(--color-brand-200);
+  --color-accent-subtle:     oklch(22% 0.04 195);
+  --color-focus-ring:        var(--color-brand-400);
+
+  --shadow-elev-1: 0 1px 3px oklch(0% 0 0 / 0.20), 0 1px 2px oklch(0% 0 0 / 0.14);
+  --shadow-elev-2: 0 4px 6px oklch(0% 0 0 / 0.18), 0 2px 4px oklch(0% 0 0 / 0.12);
+  --shadow-elev-3: 0 10px 20px oklch(0% 0 0 / 0.24), 0 4px 8px oklch(0% 0 0 / 0.16);
+}
+
+/* ── High-Contrast Theme ────────────────────────────────────── */
+.high-contrast {
+  color-scheme: light;
+
+  --color-background:     oklch(100% 0 0);
+  --color-surface:        oklch(100% 0 0);
+  --color-surface-raised: oklch(100% 0 0);
+  --color-border:         oklch(0% 0 0);
+  --color-border-strong:  oklch(0% 0 0);
+  --color-text-primary:   oklch(0% 0 0);
+  --color-text-secondary: oklch(0% 0 0);
+  --color-text-disabled:  oklch(30% 0 0);
+  --color-accent:         oklch(20% 0.20 195);
+  --color-accent-hover:   oklch(10% 0.15 195);
+  --color-focus-ring:     oklch(0% 0 0);
+
+  --shadow-elev-1: 0 0 0 2px oklch(0% 0 0);
+  --shadow-elev-2: 0 0 0 2px oklch(0% 0 0);
+  --shadow-elev-3: 0 0 0 3px oklch(0% 0 0);
+}
+
+/* ── Respect reduced motion ────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Base styles ────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+html {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Tailwind theme extension ───────────────────────────────── */
+@theme {
+  --font-ui:    var(--font-ui);
+  --font-serif: var(--font-serif);
+  --font-mono:  var(--font-mono);
+
+  --color-brand-*:   initial;
+  --color-brand-50:  var(--color-brand-50);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-700: var(--color-brand-700);
+
+  --color-background:     var(--color-background);
+  --color-surface:        var(--color-surface);
+  --color-border:         var(--color-border);
+  --color-border-strong:  var(--color-border-strong);
+  --color-accent:         var(--color-accent);
+  --color-accent-hover:   var(--color-accent-hover);
+  --color-text-primary:   var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-disabled:  var(--color-text-disabled);
+
+  --shadow-elev-0: var(--shadow-elev-0);
+  --shadow-elev-1: var(--shadow-elev-1);
+  --shadow-elev-2: var(--shadow-elev-2);
+  --shadow-elev-3: var(--shadow-elev-3);
+
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius-md);
+  --radius-lg:   var(--radius-lg);
+  --radius-xl:   var(--radius-xl);
+  --radius-full: var(--radius-full);
+}
