@@ -91,6 +91,202 @@ export interface Consultation {
   durationSeconds?: number
 }
 
+// ─── Prescription ─────────────────────────────────────────────────────────────
+export interface Prescription {
+  id: string
+  consultationId: string
+  patientId: string
+  medicId: string
+  issuedAt: string
+  expiresAt?: string
+  medications: PrescriptionMedication[]
+  diagnosis?: string
+  notes?: string
+  signatureUrl?: string
+}
+
+export interface PrescriptionMedication {
+  id: string
+  name: string
+  dosage: string
+  unit: string
+  frequency: string
+  durationDays: number
+  instructions?: string
+  interactionWarning?: string
+}
+
+// ─── Note ────────────────────────────────────────────────────────────────────
+export interface ConsultationNote {
+  id: string
+  consultationId: string
+  content: string
+  template?: 'SOAP' | 'FOLLOW_UP' | 'FREE'
+  updatedAt: string
+  isDraft: boolean
+}
+
+// ─── Vitals ──────────────────────────────────────────────────────────────────
+export interface VitalReading {
+  id: string
+  patientId: string
+  recordedAt: string
+  systolicBp?: number
+  diastolicBp?: number
+  heartRate?: number
+  weightKg?: number
+  temperatureC?: number
+  oxygenSaturation?: number
+  glucoseMgDl?: number
+}
+
+// ─── Patient Document ─────────────────────────────────────────────────────────
+export type DocumentType = 'LAB_RESULT' | 'IMAGING' | 'REFERRAL' | 'INSURANCE' | 'OTHER'
+
+export interface PatientDocument {
+  id: string
+  patientId: string
+  uploadedAt: string
+  name: string
+  type: DocumentType
+  mimeType: string
+  sizeBytes: number
+  url: string
+  uploadedByMedicId?: string
+}
+
+// ─── Timeline Event ───────────────────────────────────────────────────────────
+export type TimelineEventType = 'CONSULTATION' | 'PRESCRIPTION' | 'LAB_RESULT' | 'DOCUMENT' | 'BOOKING'
+
+export interface TimelineEvent {
+  id: string
+  type: TimelineEventType
+  timestamp: string
+  title: string
+  description?: string
+  relatedId: string
+}
+
+// ─── Patient Detail (Medic View) ──────────────────────────────────────────────
+export interface PatientDetail {
+  id: string
+  userId: string
+  firstName: string
+  lastName: string
+  dateOfBirth: string
+  bloodType?: string
+  allergies: string[]
+  email: string
+  phone?: string
+  avatarUrl?: string
+  insurerName?: string
+  insurancePolicyNumber?: string
+  lastConsultationAt?: string
+  nextBookingAt?: string
+  activeConditions: string[]
+}
+
+// ─── Dispute ─────────────────────────────────────────────────────────────────
+export type DisputeStatus = 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED_PATIENT' | 'RESOLVED_MEDIC' | 'CLOSED'
+export type DisputeReason = 'NO_SHOW_MEDIC' | 'NO_SHOW_PATIENT' | 'POOR_SERVICE' | 'TECHNICAL_ISSUE' | 'BILLING' | 'OTHER'
+
+export interface Dispute {
+  id: string
+  bookingId: string
+  patientId: string
+  medicId: string
+  filedBy: 'PATIENT' | 'MEDIC'
+  reason: DisputeReason
+  description: string
+  status: DisputeStatus
+  createdAt: string
+  updatedAt: string
+  resolvedAt?: string
+  resolution?: string
+  adminNotes?: string
+  patientName?: string
+  medicName?: string
+}
+
+// ─── Audit Log ────────────────────────────────────────────────────────────────
+export interface AuditLogEntry {
+  id: string
+  userId: string
+  userEmail: string
+  userRole: UserRole
+  action: string
+  entityType: string
+  entityId: string
+  ipAddress?: string
+  userAgent?: string
+  timestamp: string
+  metadata?: Record<string, string>
+}
+
+// ─── Clinic ───────────────────────────────────────────────────────────────────
+export interface Clinic {
+  id: string
+  name: string
+  address: string
+  city: string
+  phone: string
+  email: string
+  licenseNumber: string
+  managerId: string
+  createdAt: string
+}
+
+export interface MedicInvite {
+  id: string
+  clinicId: string
+  email: string
+  status: 'PENDING' | 'ACCEPTED' | 'EXPIRED'
+  createdAt: string
+  expiresAt: string
+}
+
+// ─── Earnings ────────────────────────────────────────────────────────────────
+export interface EarningsSummary {
+  totalGross: number
+  platformFee: number
+  totalNet: number
+  currency: string
+  period: string
+  consultationCount: number
+  avgPerConsultation: number
+}
+
+export interface EarningTransaction {
+  id: string
+  consultationId: string
+  patientName: string
+  date: string
+  grossAmount: number
+  platformFee: number
+  netAmount: number
+  currency: string
+  status: 'PENDING' | 'RELEASED' | 'REFUNDED'
+}
+
+// ─── Admin User ───────────────────────────────────────────────────────────────
+export interface AdminUser extends User {
+  createdAt: string
+  lastLoginAt?: string
+  isActive: boolean
+  consultationCount?: number
+  clinicName?: string
+}
+
+// ─── GDPR ─────────────────────────────────────────────────────────────────────
+export interface GdprConsent {
+  purpose: string
+  label: string
+  description: string
+  granted: boolean
+  grantedAt?: string
+  revokedAt?: string
+}
+
 // ─── Pagination ───────────────────────────────────────────────────────────────
 export interface Page<T> {
   content: T[]

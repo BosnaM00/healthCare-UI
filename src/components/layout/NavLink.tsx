@@ -13,16 +13,27 @@ interface NavLinkProps {
   label: string
   collapsed?: boolean
   onClick?: () => void
+  onNavigate?: (path: string) => void
+  currentPath?: string
 }
 
-export function NavLink({ to, icon, label, collapsed, onClick }: NavLinkProps) {
-  // Using <a> tags here; in a real app these would be TanStack Router <Link> components
-  const isActive = typeof window !== 'undefined' && window.location.pathname.startsWith(to)
+export function NavLink({ to, icon, label, collapsed, onClick, onNavigate, currentPath }: NavLinkProps) {
+  const isActive = currentPath
+    ? to === '/admin'
+      ? currentPath === '/admin'
+      : currentPath.startsWith(to)
+    : false
+
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault()
+    onClick?.()
+    onNavigate?.(to)
+  }
 
   const linkContent = (
     <a
       href={to}
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
         'flex items-center gap-3 rounded-[--radius-md] px-3 py-2 text-sm font-medium transition-colors duration-[--duration-fast]',
         'hover:bg-[--color-surface-raised] hover:text-[--color-text-primary]',

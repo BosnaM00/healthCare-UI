@@ -12,6 +12,9 @@ import {
   Stethoscope,
   BarChart2,
   ShieldCheck,
+  AlertOctagon,
+  ClipboardList,
+  Building2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth.store'
@@ -25,25 +28,36 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard',    to: '/dashboard',          icon: <LayoutDashboard className="h-5 w-5" />, roles: ['PATIENT', 'MEDIC', 'CLINIC_MANAGER', 'ADMIN'] },
-  { label: 'My Bookings',  to: '/bookings',           icon: <Calendar className="h-5 w-5" />,       roles: ['PATIENT'] },
-  { label: 'Find a Medic', to: '/medics',             icon: <Search className="h-5 w-5" />,         roles: ['PATIENT'] },
-  { label: 'My Schedule',  to: '/schedule',           icon: <Calendar className="h-5 w-5" />,       roles: ['MEDIC'] },
-  { label: 'Patients',     to: '/patients',           icon: <Users className="h-5 w-5" />,          roles: ['MEDIC', 'CLINIC_MANAGER'] },
-  { label: 'Medics',       to: '/admin/medics',       icon: <Stethoscope className="h-5 w-5" />,    roles: ['CLINIC_MANAGER', 'ADMIN'] },
-  { label: 'Prescriptions',to: '/prescriptions',      icon: <FileText className="h-5 w-5" />,       roles: ['MEDIC', 'PATIENT'] },
-  { label: 'Reports',      to: '/reports',            icon: <BarChart2 className="h-5 w-5" />,      roles: ['CLINIC_MANAGER', 'ADMIN'] },
-  { label: 'Admin',        to: '/admin',              icon: <ShieldCheck className="h-5 w-5" />,    roles: ['ADMIN'] },
-  { label: 'Settings',     to: '/settings',           icon: <Settings className="h-5 w-5" />,       roles: ['PATIENT', 'MEDIC', 'CLINIC_MANAGER', 'ADMIN'] },
+  // Common
+  { label: 'Dashboard',      to: '/dashboard',      icon: <LayoutDashboard className="h-5 w-5" />, roles: ['PATIENT', 'MEDIC', 'CLINIC_MANAGER', 'ADMIN'] },
+  // Patient
+  { label: 'My Bookings',    to: '/bookings',       icon: <Calendar className="h-5 w-5" />,        roles: ['PATIENT'] },
+  { label: 'Find a Medic',   to: '/medics',         icon: <Search className="h-5 w-5" />,          roles: ['PATIENT'] },
+  // Medic
+  { label: 'My Schedule',    to: '/schedule',       icon: <Calendar className="h-5 w-5" />,        roles: ['MEDIC'] },
+  { label: 'Patients',       to: '/patients',       icon: <Users className="h-5 w-5" />,           roles: ['MEDIC'] },
+  { label: 'Prescriptions',  to: '/prescriptions',  icon: <FileText className="h-5 w-5" />,        roles: ['MEDIC', 'PATIENT'] },
+  // Clinic Manager
+  { label: 'Clinic',         to: '/reports',        icon: <Building2 className="h-5 w-5" />,       roles: ['CLINIC_MANAGER'] },
+  { label: 'Medics',         to: '/admin/medics',   icon: <Stethoscope className="h-5 w-5" />,     roles: ['CLINIC_MANAGER'] },
+  // Admin
+  { label: 'Disputes',       to: '/admin',          icon: <AlertOctagon className="h-5 w-5" />,    roles: ['ADMIN'] },
+  { label: 'Users',          to: '/admin/users',    icon: <Users className="h-5 w-5" />,           roles: ['ADMIN'] },
+  { label: 'Audit Log',      to: '/admin/audit',    icon: <ClipboardList className="h-5 w-5" />,   roles: ['ADMIN'] },
+  { label: 'Reports',        to: '/reports',        icon: <BarChart2 className="h-5 w-5" />,       roles: ['ADMIN'] },
+  // Common
+  { label: 'Settings',       to: '/settings',       icon: <Settings className="h-5 w-5" />,        roles: ['PATIENT', 'MEDIC', 'CLINIC_MANAGER', 'ADMIN'] },
 ]
 
 interface SidebarProps {
   open?: boolean
   onClose?: () => void
   className?: string
+  onNavigate?: (path: string) => void
+  currentPath?: string
 }
 
-export function Sidebar({ open, onClose, className }: SidebarProps) {
+export function Sidebar({ open, onClose, className, onNavigate, currentPath }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const user = useAuthStore((s) => s.user)
   const role = user?.role ?? 'PATIENT'
@@ -84,6 +98,8 @@ export function Sidebar({ open, onClose, className }: SidebarProps) {
                   label={item.label}
                   collapsed={collapsed}
                   onClick={onClose}
+                  onNavigate={onNavigate}
+                  currentPath={currentPath}
                 />
               </li>
             ))}

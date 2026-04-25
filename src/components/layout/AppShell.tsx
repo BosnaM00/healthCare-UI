@@ -7,9 +7,11 @@ import { cn } from '@/lib/utils'
 interface AppShellProps {
   children: React.ReactNode
   className?: string
+  onNavigate?: (path: string) => void
+  currentPath?: string
 }
 
-export function AppShell({ children, className }: AppShellProps) {
+export function AppShell({ children, className, onNavigate, currentPath }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
@@ -20,6 +22,8 @@ export function AppShell({ children, className }: AppShellProps) {
         <Sidebar
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          onNavigate={onNavigate}
+          currentPath={currentPath}
         />
 
         {/* Main content */}
@@ -32,9 +36,7 @@ export function AppShell({ children, className }: AppShellProps) {
           )}
           tabIndex={-1}
         >
-          <div className="p-4 sm:p-6 lg:p-8 max-w-[--content-max-width] mx-auto">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
 
