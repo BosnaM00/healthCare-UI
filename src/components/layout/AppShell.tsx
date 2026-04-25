@@ -13,6 +13,7 @@ interface AppShellProps {
 
 export function AppShell({ children, className, onNavigate, currentPath }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
     <div className="min-h-screen bg-[--color-background]">
@@ -24,14 +25,16 @@ export function AppShell({ children, className, onNavigate, currentPath }: AppSh
           onClose={() => setSidebarOpen(false)}
           onNavigate={onNavigate}
           currentPath={currentPath}
+          collapsed={sidebarCollapsed}
+          onCollapse={setSidebarCollapsed}
         />
 
-        {/* Main content */}
+        {/* Main content — offset by sidebar width on desktop */}
         <main
           id="main-content"
           className={cn(
             'flex-1 min-h-[calc(100vh-var(--topbar-height))] transition-all duration-[--duration-layout]',
-            'lg:ml-[--sidebar-width]',
+            sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60',
             className
           )}
           tabIndex={-1}

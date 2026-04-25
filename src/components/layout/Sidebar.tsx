@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { NavLink } from '@/components/layout/NavLink'
 import {
   LayoutDashboard,
@@ -55,10 +55,11 @@ interface SidebarProps {
   className?: string
   onNavigate?: (path: string) => void
   currentPath?: string
+  collapsed?: boolean
+  onCollapse?: (collapsed: boolean) => void
 }
 
-export function Sidebar({ open, onClose, className, onNavigate, currentPath }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false)
+export function Sidebar({ open, onClose, className, onNavigate, currentPath, collapsed = false, onCollapse }: SidebarProps) {
   const user = useAuthStore((s) => s.user)
   const role = user?.role ?? 'PATIENT'
 
@@ -78,7 +79,7 @@ export function Sidebar({ open, onClose, className, onNavigate, currentPath }: S
       <aside
         className={cn(
           'fixed left-0 top-[--topbar-height] z-30 flex h-[calc(100vh-var(--topbar-height))] flex-col border-r border-[--color-border] bg-[--color-surface] transition-all duration-[--duration-layout]',
-          collapsed ? 'w-[--sidebar-width-collapsed]' : 'w-[--sidebar-width]',
+          collapsed ? 'w-16' : 'w-60',
           // Mobile: translate off-screen when closed
           'lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
@@ -110,7 +111,7 @@ export function Sidebar({ open, onClose, className, onNavigate, currentPath }: S
         <div className="hidden lg:flex border-t border-[--color-border] p-2 justify-end">
           <button
             className="rounded-[--radius-md] p-1.5 text-[--color-text-secondary] hover:bg-[--color-surface-raised] hover:text-[--color-text-primary] transition-colors"
-            onClick={() => setCollapsed((c) => !c)}
+            onClick={() => onCollapse?.(!collapsed)}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
