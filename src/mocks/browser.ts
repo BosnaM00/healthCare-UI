@@ -5,6 +5,7 @@ import { patientHandlers } from './handlers/patient.handlers'
 import { consultationHandlers } from './handlers/consultation.handlers'
 import { adminHandlers } from './handlers/admin.handlers'
 import { clinicHandlers } from './handlers/clinic.handlers'
+import { paymentsHandlers } from './handlers/payments.handlers'
 
 export const worker = setupWorker(
   ...authHandlers,
@@ -13,4 +14,5 @@ export const worker = setupWorker(
   ...consultationHandlers,
   ...adminHandlers,
   ...clinicHandlers,
+  ...paymentsHandlers,
 )

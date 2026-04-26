@@ -1,0 +1,35 @@
+{
+  "onboarding": {
+    "title": "Configurare plăți Stripe",
+    "subtitle": "Conectează contul tău Stripe pentru a primi plăți de la pacienți.",
+    "start": "Începe configurarea",
+    "status": {
+      "chargesEnabled": "Acceptare plăți activată",
+      "payoutsEnabled": "Plăți activate",
+      "detailsSubmitted": "Detalii trimise",
+      "pending": "În așteptare"
+    },
+    "checklist": "Stare cont",
+    "complete": "Cont complet configurat",
+    "incomplete": "Configurare incompletă",
+    "returnMessage": "Bine ai revenit! Verificăm starea contului tău..."
+  },
+  "payouts": {
+    "title": "Istoricul plăților",
+    "empty": "Nu există plăți înregistrate.",
+    "columns": {
+      "amount": "Sumă",
+      "status": "Stare",
+      "arrival": "Data sosirii",
+      "actions": ""
+    },
+    "viewOnStripe": "Vezi pe Stripe",
+    "statusLabels": {
+      "paid": "Plătit",
+      "pending": "În așteptare",
+      "in_transit": "În tranzit",
+      "canceled": "Anulat",
+      "failed": "Eșuat"
+    }
+  }
+}

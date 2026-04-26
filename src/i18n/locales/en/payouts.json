@@ -1,0 +1,35 @@
+{
+  "onboarding": {
+    "title": "Stripe Payments Setup",
+    "subtitle": "Connect your Stripe account to receive payments from patients.",
+    "start": "Start setup",
+    "status": {
+      "chargesEnabled": "Accepting payments",
+      "payoutsEnabled": "Payouts enabled",
+      "detailsSubmitted": "Details submitted",
+      "pending": "Pending"
+    },
+    "checklist": "Account status",
+    "complete": "Account fully set up",
+    "incomplete": "Setup incomplete",
+    "returnMessage": "Welcome back! Checking your account status..."
+  },
+  "payouts": {
+    "title": "Payout History",
+    "empty": "No payouts recorded yet.",
+    "columns": {
+      "amount": "Amount",
+      "status": "Status",
+      "arrival": "Arrival date",
+      "actions": ""
+    },
+    "viewOnStripe": "View on Stripe",
+    "statusLabels": {
+      "paid": "Paid",
+      "pending": "Pending",
+      "in_transit": "In transit",
+      "canceled": "Canceled",
+      "failed": "Failed"
+    }
+  }
+}

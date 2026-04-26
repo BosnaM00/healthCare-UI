@@ -11,10 +11,11 @@ import {
   ChevronRight,
   Stethoscope,
   BarChart2,
-  ShieldCheck,
   AlertOctagon,
   ClipboardList,
   Building2,
+  CreditCard,
+  Wallet,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth.store'
@@ -34,9 +35,11 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'My Bookings',    to: '/bookings',       icon: <Calendar className="h-5 w-5" />,        roles: ['PATIENT'] },
   { label: 'Find a Medic',   to: '/medics',         icon: <Search className="h-5 w-5" />,          roles: ['PATIENT'] },
   // Medic
-  { label: 'My Schedule',    to: '/schedule',       icon: <Calendar className="h-5 w-5" />,        roles: ['MEDIC'] },
-  { label: 'Patients',       to: '/patients',       icon: <Users className="h-5 w-5" />,           roles: ['MEDIC'] },
-  { label: 'Prescriptions',  to: '/prescriptions',  icon: <FileText className="h-5 w-5" />,        roles: ['MEDIC', 'PATIENT'] },
+  { label: 'My Schedule',    to: '/schedule',         icon: <Calendar className="h-5 w-5" />,        roles: ['MEDIC'] },
+  { label: 'Patients',       to: '/patients',         icon: <Users className="h-5 w-5" />,           roles: ['MEDIC'] },
+  { label: 'Prescriptions',  to: '/prescriptions',    icon: <FileText className="h-5 w-5" />,        roles: ['MEDIC', 'PATIENT'] },
+  { label: 'Payouts',        to: '/medic/payouts',    icon: <Wallet className="h-5 w-5" />,          roles: ['MEDIC'] },
+  { label: 'Stripe Setup',   to: '/medic/onboarding', icon: <CreditCard className="h-5 w-5" />,      roles: ['MEDIC'] },
   // Clinic Manager
   { label: 'Clinic',         to: '/reports',        icon: <Building2 className="h-5 w-5" />,       roles: ['CLINIC_MANAGER'] },
   { label: 'Medics',         to: '/admin/medics',   icon: <Stethoscope className="h-5 w-5" />,     roles: ['CLINIC_MANAGER'] },

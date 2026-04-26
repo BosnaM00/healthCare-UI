@@ -14,6 +14,7 @@ import {
   DialogDescription, DialogFooter,
 } from '@/components/ui/dialog'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { StripeStatusBadge } from '@/features/payments/StripeStatusBadge'
 
 interface BookingDetailPageProps {
   bookingId: string
@@ -154,9 +155,7 @@ export function BookingDetailPage({ bookingId, onBack }: BookingDetailPageProps)
               <CreditCard className="h-3.5 w-3.5" />
               Payment
             </span>
-            <Badge variant={booking.paymentStatus === 'CAPTURED' ? 'success' : 'warning'}>
-              {booking.paymentStatus}
-            </Badge>
+            <StripeStatusBadge state={booking.paymentStatus} viewerRole="patient" />
           </div>
         </div>
       </div>

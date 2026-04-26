@@ -12,6 +12,7 @@ export type Subjects =
   | 'Report'
   | 'Audit'
   | 'Admin'
+  | 'OwnPayouts'
   | 'all'
 
 export type AppAbility = MongoAbility<[Actions, Subjects]>
@@ -39,6 +40,7 @@ export function defineAbilityFor(role: UserRole): AppAbility {
       can('manage', 'Prescription')
       can('read', 'Report')
       can('update', 'Medic') // own profile
+      can('manage', 'OwnPayouts') // Stripe Connect payouts
       break
 
     case 'CLINIC_MANAGER':

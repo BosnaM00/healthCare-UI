@@ -19,6 +19,12 @@ import { MedicProfilePage } from '@/features/booking/components/MedicProfilePage
 import { BookingSheet } from '@/features/booking/components/BookingSheet'
 import { BookingDetailPage } from '@/features/booking/components/BookingDetailPage'
 
+// Payments (Stripe Connect)
+import { MedicOnboardingPage } from '@/features/payments/MedicOnboardingPage'
+import { MedicPayoutsPage } from '@/features/payments/MedicPayoutsPage'
+import { BookingResultPage } from '@/features/payments/BookingResultPage'
+import { env } from '@/env'
+
 // Phase 2 — Medic
 import { MedicDashboard } from '@/features/medic/components/MedicDashboard'
 import { PatientDetailPage } from '@/features/medic/components/PatientDetailPage'
@@ -53,6 +59,7 @@ type Route =
   | { id: 'medics' }
   | { id: 'medic-profile'; medicId: string }
   | { id: 'booking-detail'; bookingId: string; booking?: Booking }
+  | { id: 'booking-result'; bookingId: string; paymentId: string; clientSecret: string; publishableKey: string }
   | { id: 'profile' }
   | { id: 'settings' }
   // Dispute filing (patient)
@@ -62,6 +69,8 @@ type Route =
   | { id: 'medic-patients' }
   | { id: 'patient-detail'; patientId: string }
   | { id: 'consultation'; consultationId: string; booking: Booking }
+  | { id: 'medic-onboarding' }
+  | { id: 'medic-payouts' }
   // Admin routes
   | { id: 'admin-disputes' }
   | { id: 'admin-users' }
@@ -165,6 +174,12 @@ export default function App() {
       case '/schedule':
         setRoute({ id: 'medic-dashboard' })
         break
+      case '/medic/onboarding':
+        setRoute({ id: 'medic-onboarding' })
+        break
+      case '/medic/payouts':
+        setRoute({ id: 'medic-payouts' })
+        break
       case '/settings':
         setRoute({ id: 'settings' })
         break
@@ -214,6 +229,11 @@ export default function App() {
                   setBookingTarget(null)
                   setRoute({ id: 'booking-detail', bookingId })
                 }}
+                onPaymentResult={(bookingId, _paymentId) => {
+                  // Payment confirmed; navigate to booking detail
+                  setBookingTarget(null)
+                  setRoute({ id: 'booking-detail', bookingId })
+                }}
               />
             )}
           </>
@@ -224,6 +244,18 @@ export default function App() {
           <BookingDetailPage
             bookingId={route.bookingId}
             onBack={() => setRoute({ id: 'dashboard' })}
+          />
+        )
+
+      case 'booking-result':
+        return (
+          <BookingResultPage
+            bookingId={route.bookingId}
+            paymentId={route.paymentId}
+            clientSecret={route.clientSecret}
+            publishableKey={route.publishableKey}
+            onViewBooking={(id) => setRoute({ id: 'booking-detail', bookingId: id })}
+            onRetry={() => setRoute({ id: 'medics' })}
           />
         )
 
@@ -334,6 +366,20 @@ export default function App() {
           />
         )
 
+      case 'medic-onboarding':
+        return (
+          <MedicOnboardingPage
+            onGoToPayouts={() => setRoute({ id: 'medic-payouts' })}
+          />
+        )
+
+      case 'medic-payouts':
+        return (
+          <MedicPayoutsPage
+            onGoToOnboarding={() => setRoute({ id: 'medic-onboarding' })}
+          />
+        )
+
       // ── Admin ─────────────────────────────────────────────────────────────
       case 'admin-disputes':
         return <AdminDisputeQueue />
@@ -377,12 +423,15 @@ function routeToPath(route: Route): string {
     case 'medics': return '/medics'
     case 'medic-profile': return '/medics'
     case 'booking-detail': return '/bookings'
+    case 'booking-result': return '/bookings'
     case 'profile': return '/profile'
     case 'settings': return '/settings'
     case 'medic-dashboard': return '/dashboard'
     case 'medic-patients': return '/patients'
     case 'patient-detail': return '/patients'
     case 'consultation': return '/consultations'
+    case 'medic-onboarding': return '/medic/onboarding'
+    case 'medic-payouts': return '/medic/payouts'
     case 'admin-disputes': return '/admin'
     case 'admin-users': return '/admin/users'
     case 'admin-audit': return '/admin/audit'

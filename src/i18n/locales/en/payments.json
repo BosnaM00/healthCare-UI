@@ -1,0 +1,69 @@
+{
+  "status": {
+    "RESERVED": "Awaiting confirmation",
+    "HELD": "Paid — held in escrow",
+    "RELEASED": "Completed",
+    "REFUNDED": "Refunded",
+    "DISPUTED": "Under review",
+    "FAILED": "Payment failed",
+    "PENDING": "Pending",
+    "CAPTURED": "Captured"
+  },
+  "statusMedic": {
+    "RESERVED": "Pending",
+    "HELD": "Earnings pending",
+    "RELEASED": "Paid out",
+    "REFUNDED": "Refunded",
+    "DISPUTED": "Under review",
+    "FAILED": ""
+  },
+  "sheet": {
+    "title": "Book Appointment",
+    "titleDone": "Booking Confirmed",
+    "summary": "Appointment Summary",
+    "doctor": "Doctor",
+    "date": "Date",
+    "time": "Time",
+    "type": "Type",
+    "total": "Total",
+    "policy": "Cancellation Policy",
+    "policyText": "Free cancellation up to 2 hours before the appointment. Later cancellations will not be refunded.",
+    "policyAccept": "I have read and accept the cancellation policy",
+    "paymentSection": "Payment",
+    "paymentSecure": "Secure · PCI-DSS compliant",
+    "cancel": "Cancel",
+    "confirmPay": "Confirm & Pay",
+    "processing": "Processing...",
+    "done": {
+      "heading": "You're all set!",
+      "subtext": "Your appointment with Dr. {{name}} is confirmed.",
+      "emailNote": "Confirmation has been sent to your email.",
+      "bookingId": "Booking ID",
+      "goToBookings": "Go to my bookings"
+    }
+  },
+  "result": {
+    "title": "Payment Status",
+    "succeeded": "Payment successful",
+    "succeeded_desc": "Your appointment is confirmed and payment has been processed successfully.",
+    "processing": "Payment processing",
+    "processing_desc": "Your payment is being processed. You will be notified upon completion.",
+    "requires_action": "Action required",
+    "requires_action_desc": "Additional authentication is required. Follow your bank's instructions.",
+    "failed": "Payment failed",
+    "failed_desc": "There was a problem processing your payment. Please check your card details and try again.",
+    "unknown": "Unknown status",
+    "viewBooking": "View booking",
+    "retry": "Try again"
+  },
+  "errors": {
+    "card_declined": "Your card was declined. Check your details or use a different card.",
+    "insufficient_funds": "Your card has insufficient funds.",
+    "expired_card": "Your card has expired.",
+    "incorrect_cvc": "Your card's security code is incorrect.",
+    "processing_error": "A processing error occurred. Please try again.",
+    "authentication_required": "Additional authentication is required.",
+    "generic_decline": "Your payment was declined. Please contact your bank.",
+    "default": "A payment error occurred. Please try again."
+  }
+}

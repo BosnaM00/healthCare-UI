@@ -51,7 +51,17 @@ export interface Medic {
 }
 
 // ─── Booking ─────────────────────────────────────────────────────────────────
-export type PaymentStatus = 'PENDING' | 'CAPTURED' | 'REFUNDED' | 'RELEASED'
+/** Full payment state machine as defined by the Stripe escrow model */
+export type PaymentStatus =
+  | 'RESERVED'  // PaymentIntent created, awaiting 3DS/capture
+  | 'HELD'      // payment_intent.succeeded — funds held in escrow
+  | 'RELEASED'  // Transfer sent to medic after consultation
+  | 'REFUNDED'  // Full or partial refund issued
+  | 'DISPUTED'  // Chargeback / dispute opened
+  | 'FAILED'    // payment_intent.payment_failed
+  // Legacy values kept for backwards-compat with mocks
+  | 'PENDING'
+  | 'CAPTURED'
 export type BookingStatus = 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW'
 
 export interface Slot {
@@ -285,6 +295,50 @@ export interface GdprConsent {
   granted: boolean
   grantedAt?: string
   revokedAt?: string
+}
+
+// ─── Stripe / Payments ───────────────────────────────────────────────────────
+
+/** Response from POST /api/v1/payments/intents */
+export interface PaymentIntentResponse {
+  paymentId: string
+  clientSecret: string
+  publishableKey: string
+}
+
+/** Single payment record from GET /api/v1/payments/:id */
+export interface Payment {
+  id: string
+  bookingId: string
+  patientId: string
+  medicId: string
+  amountBani: number
+  applicationFeeBani: number
+  currency: 'RON'
+  state: PaymentStatus
+  stripePaymentIntentId?: string
+  createdAt: string
+  updatedAt: string
+}
+
+/** Medic Stripe account capability flags from GET /medics/me/stripe/status */
+export interface MedicStripeStatus {
+  stripeAccountId: string | null
+  chargesEnabled: boolean
+  payoutsEnabled: boolean
+  detailsSubmitted: boolean
+  requirementsCurrentlyDue: string[]
+  onboardingComplete: boolean
+}
+
+/** Single payout record from GET /medics/me/payouts */
+export interface PayoutRecord {
+  id: string
+  amountBani: number
+  currency: string
+  status: 'paid' | 'pending' | 'in_transit' | 'canceled' | 'failed'
+  arrivalDate: string
+  loginLinkUrl?: string
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
