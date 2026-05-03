@@ -97,12 +97,13 @@ const tomorrow = new Date(Date.now() + 86400000)
 
 export const mockSlots: Slot[] = [
   {
+    // slot-1: started 5 minutes ago — join window is open for testing
     id: 'slot-1',
     medicId: 'med-1',
-    startTime: new Date(tomorrow.setHours(9, 0, 0, 0)).toISOString(),
-    endTime: new Date(tomorrow.setHours(9, 30, 0, 0)).toISOString(),
+    startTime: new Date(Date.now() - 5 * 60_000).toISOString(),
+    endTime: new Date(Date.now() + 25 * 60_000).toISOString(),
     consultationType: 'VIDEO',
-    available: true,
+    available: false,
   },
   {
     id: 'slot-2',

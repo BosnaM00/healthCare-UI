@@ -4,6 +4,7 @@ import {
   AlertTriangle, CheckCircle2, XCircle,
 } from 'lucide-react'
 import { useBooking, useCancelBooking } from '../hooks/use-booking'
+import { useConsultationByBookingId } from '@/features/consultation/hooks/use-consultation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -19,6 +20,7 @@ import { ConsultationJoinButton } from '@/features/consultation/components/Consu
 
 interface BookingDetailPageProps {
   bookingId: string
+  /** Optional — if not supplied the page fetches it via /consultations/booking/:id */
   consultationId?: string
   onBack?: () => void
   onJoinConsultation?: (consultationId: string) => void
@@ -26,13 +28,17 @@ interface BookingDetailPageProps {
 
 export function BookingDetailPage({
   bookingId,
-  consultationId,
+  consultationId: consultationIdProp,
   onBack,
   onJoinConsultation,
 }: BookingDetailPageProps) {
   const { data: booking, isLoading } = useBooking(bookingId)
   const cancel = useCancelBooking()
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+
+  // Self-resolve the consultationId if it wasn't threaded through the router
+  const { data: consultationByBooking } = useConsultationByBookingId(bookingId)
+  const consultationId = consultationIdProp ?? consultationByBooking?.id
 
   if (isLoading) {
     return (

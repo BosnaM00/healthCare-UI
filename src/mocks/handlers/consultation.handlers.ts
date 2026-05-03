@@ -11,12 +11,12 @@ const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api'
 
 const mockConsultation: Consultation = {
   id: 'consult-1',
-  bookingId: 'bk-1',
+  bookingId: 'book-1',   // matches mockBookings[0].id in fixtures.ts
   status: 'IN_PROGRESS',
   videoRoomId: 'mediconnect-test-room',
   videoRoomUrl: 'https://mediconnect.daily.co/mediconnect-test-room',
   videoProvider: 'daily',
-  startedAt: new Date(Date.now() - 600_000).toISOString(),
+  startedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
   failureReason: null,
 }
 
@@ -174,10 +174,19 @@ const mockTimeline: TimelineEvent[] = [
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
 export const consultationHandlers = [
-  // GET consultation
+  // GET consultation by ID
   http.get(`${BASE}/consultations/:id`, async ({ params }) => {
     await delay(200)
     return HttpResponse.json({ ...mockConsultation, id: params.id as string })
+  }),
+
+  // GET consultation by booking ID — used by BookingDetailPage to resolve consultationId
+  http.get(`${BASE}/consultations/booking/:bookingId`, async ({ params }) => {
+    await delay(150)
+    if (params.bookingId === 'book-1') {
+      return HttpResponse.json(mockConsultation)
+    }
+    return new HttpResponse(null, { status: 404 })
   }),
 
   // POST start consultation

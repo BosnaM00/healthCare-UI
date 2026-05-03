@@ -44,6 +44,20 @@ export function useConsultationPrescriptions(consultationId: string) {
   })
 }
 
+/**
+ * Looks up the consultation linked to a given booking.
+ * Used by BookingDetailPage so the patient can join without the
+ * consultationId being threaded through the router.
+ */
+export function useConsultationByBookingId(bookingId: string) {
+  return useQuery({
+    queryKey: ['consultation-by-booking', bookingId],
+    queryFn: () => api.get<Consultation>(`/consultations/booking/${bookingId}`),
+    enabled: !!bookingId,
+    staleTime: 30_000,
+  })
+}
+
 export function useConsultationDiagnostics(consultationId: string, enabled = false) {
   return useQuery({
     queryKey: ['consultation-diagnostics', consultationId],
