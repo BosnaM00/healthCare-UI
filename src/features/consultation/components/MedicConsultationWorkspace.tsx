@@ -305,24 +305,35 @@ export function MedicConsultationWorkspace({
   const { data: consultation } = useConsultation(consultationId)
   const joinToken = useJoinToken(consultationId)
 
-  // Auto-fetch token once we have a room URL
+  // Auto-fetch OWNER token once the room URL is available
   React.useEffect(() => {
     if (consultation?.videoRoomUrl && !joinToken.data && !joinToken.isPending) {
       joinToken.mutate()
     }
   }, [consultation?.videoRoomUrl]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // While we have a room URL and are waiting for the token, show a spinner
-  if (consultation?.videoRoomUrl && !joinToken.data) {
-    return <JoinLoading />
-  }
-
-  const roomUrl = joinToken.data?.roomUrl ?? consultation?.videoRoomUrl ?? ''
+  const roomUrl = joinToken.data?.roomUrl ?? ''
   const token = joinToken.data?.token
 
+  // No room yet — render workspace shell without Daily (video pane shows placeholder)
+  if (!roomUrl || !token) {
+    return (
+      <DailyProvider callObject={null}>
+        <WorkspaceInner
+          consultationId={consultationId}
+          booking={booking}
+          onBack={onBack}
+          onViewPatient={onViewPatient}
+          roomUrl=""
+        />
+      </DailyProvider>
+    )
+  }
+
+  // Room + token ready — mount a live Daily call
   return (
     <DailyProvider
-      url={roomUrl || undefined}
+      url={roomUrl}
       token={token}
       subscribeToTracksAutomatically
     >

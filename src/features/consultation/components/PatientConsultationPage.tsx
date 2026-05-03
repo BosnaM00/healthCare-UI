@@ -358,41 +358,43 @@ export function PatientConsultationPage({
     )
   }
 
-  const roomUrl = joinToken.data?.roomUrl ?? consultation?.videoRoomUrl ?? ''
+  const roomUrl = joinToken.data?.roomUrl ?? ''
   const token = joinToken.data?.token
 
+  // ── Pre-call lobby (no DailyProvider needed yet) ──────────────────────────
+  if (!joined || !roomUrl || !token) {
+    return (
+      <div className="flex flex-col">
+        <div className="px-6 pt-4 shrink-0">
+          <PageHeader
+            title="Consultation"
+            actions={
+              <Button variant="ghost" size="sm" onClick={onBack} className="gap-1.5">
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            }
+          />
+          <Separator />
+        </div>
+        <Lobby booking={booking} onJoin={handleJoin} isJoining={joinToken.isPending} />
+      </div>
+    )
+  }
+
+  // ── Active call — only mount DailyProvider once we have a real URL + token ─
   return (
     <DailyProvider
-      url={joined && roomUrl ? roomUrl : undefined}
-      token={joined ? token : undefined}
+      url={roomUrl}
+      token={token}
       subscribeToTracksAutomatically
     >
-      <div className={cn('flex flex-col', joined ? 'h-[calc(100vh-var(--topbar-height))]' : '')}>
-        {!joined && (
-          <>
-            <div className="px-6 pt-4 shrink-0">
-              <PageHeader
-                title="Consultation"
-                actions={
-                  <Button variant="ghost" size="sm" onClick={onBack} className="gap-1.5">
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </Button>
-                }
-              />
-              <Separator />
-            </div>
-            <Lobby booking={booking} onJoin={handleJoin} isJoining={joinToken.isPending} />
-          </>
-        )}
-
-        {joined && (
-          <ActiveCall
-            consultationId={consultationId}
-            booking={booking}
-            onBack={onBack}
-          />
-        )}
+      <div className="flex flex-col h-[calc(100vh-var(--topbar-height))]">
+        <ActiveCall
+          consultationId={consultationId}
+          booking={booking}
+          onBack={onBack}
+        />
       </div>
     </DailyProvider>
   )
