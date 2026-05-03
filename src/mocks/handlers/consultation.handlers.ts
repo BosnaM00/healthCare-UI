@@ -1,6 +1,7 @@
 import { http, HttpResponse, delay } from 'msw'
 import type {
-  Consultation, ConsultationNote, Prescription, PrescriptionMedication,
+  Consultation, ConsultationNote, ConsultationDiagnostics, JoinTokenResponse,
+  Prescription, PrescriptionMedication,
   VitalReading, PatientDocument, PatientDetail, TimelineEvent,
 } from '@/types'
 
@@ -13,7 +14,29 @@ const mockConsultation: Consultation = {
   bookingId: 'bk-1',
   status: 'IN_PROGRESS',
   videoRoomId: 'mediconnect-test-room',
+  videoRoomUrl: 'https://mediconnect.daily.co/mediconnect-test-room',
+  videoProvider: 'daily',
   startedAt: new Date(Date.now() - 600_000).toISOString(),
+  failureReason: null,
+}
+
+const mockJoinToken: JoinTokenResponse = {
+  roomUrl: 'https://mediconnect.daily.co/mediconnect-test-room',
+  token: 'mock-daily-token-abc123',
+  role: 'PARTICIPANT',
+  expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+}
+
+const mockDiagnostics: ConsultationDiagnostics = {
+  consultationId: 'consult-1',
+  webhookTimestamps: {
+    'meeting.started': new Date(Date.now() - 600_000).toISOString(),
+    'participant.joined': new Date(Date.now() - 590_000).toISOString(),
+  },
+  heartbeatSamples: [
+    { ts: new Date(Date.now() - 300_000).toISOString(), networkRttMs: 45, mediaState: 'connected' },
+    { ts: new Date(Date.now() - 270_000).toISOString(), networkRttMs: 52, mediaState: 'connected' },
+  ],
 }
 
 const mockNote: ConsultationNote = {
@@ -293,5 +316,28 @@ export const consultationHandlers = [
   http.get(`${BASE}/medic/earnings/transactions`, async () => {
     await delay(200)
     return HttpResponse.json([])
+  }),
+
+  // POST /consultations/:id/join — issue a Daily meeting token
+  http.post(`${BASE}/consultations/:id/join`, async ({ params }) => {
+    await delay(300)
+    return HttpResponse.json({
+      ...mockJoinToken,
+      // Return OWNER token for medic-side tests; PARTICIPANT for patient
+      role: 'PARTICIPANT' as const,
+      expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+    } satisfies JoinTokenResponse)
+  }),
+
+  // POST /consultations/:id/heartbeat — best-effort, always 204
+  http.post(`${BASE}/consultations/:id/heartbeat`, async () => {
+    await delay(50)
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // GET /consultations/:id/diagnostics — used by dispute UI
+  http.get(`${BASE}/consultations/:id/diagnostics`, async ({ params }) => {
+    await delay(200)
+    return HttpResponse.json({ ...mockDiagnostics, consultationId: params.id as string })
   }),
 ]

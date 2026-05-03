@@ -31,6 +31,7 @@ import { PatientDetailPage } from '@/features/medic/components/PatientDetailPage
 
 // Phase 2 — Consultation
 import { MedicConsultationWorkspace } from '@/features/consultation/components/MedicConsultationWorkspace'
+import { PatientConsultationPage } from '@/features/consultation/components/PatientConsultationPage'
 
 // Phase 2 — Admin
 import { AdminDisputeQueue } from '@/features/admin/components/AdminDisputeQueue'
@@ -69,6 +70,7 @@ type Route =
   | { id: 'medic-patients' }
   | { id: 'patient-detail'; patientId: string }
   | { id: 'consultation'; consultationId: string; booking: Booking }
+  | { id: 'patient-consultation'; consultationId: string; bookingId: string; booking: Booking }
   | { id: 'medic-onboarding' }
   | { id: 'medic-payouts' }
   // Admin routes
@@ -243,7 +245,43 @@ export default function App() {
         return (
           <BookingDetailPage
             bookingId={route.bookingId}
+            consultationId={route.booking ? 'consult-1' : undefined}
             onBack={() => setRoute({ id: 'dashboard' })}
+            onJoinConsultation={(consultationId) =>
+              setRoute({
+                id: 'patient-consultation',
+                consultationId,
+                bookingId: route.bookingId,
+                booking: route.booking ?? {
+                  id: route.bookingId,
+                  patientId: 'usr-patient-1',
+                  medicId: 'med-1',
+                  slotId: 'slot-1',
+                  consultationType: 'VIDEO',
+                  paymentStatus: 'HELD',
+                  bookingStatus: 'CONFIRMED',
+                  createdAt: new Date().toISOString(),
+                  slot: {
+                    id: 'slot-1',
+                    medicId: 'med-1',
+                    startTime: new Date().toISOString(),
+                    endTime: new Date(Date.now() + 1800_000).toISOString(),
+                    consultationType: 'VIDEO',
+                    available: false,
+                  },
+                },
+              })
+            }
+          />
+        )
+
+      case 'patient-consultation':
+        return (
+          <PatientConsultationPage
+            consultationId={route.consultationId}
+            bookingId={route.bookingId}
+            booking={route.booking}
+            onBack={() => setRoute({ id: 'booking-detail', bookingId: route.bookingId })}
           />
         )
 
@@ -430,6 +468,7 @@ function routeToPath(route: Route): string {
     case 'medic-patients': return '/patients'
     case 'patient-detail': return '/patients'
     case 'consultation': return '/consultations'
+    case 'patient-consultation': return '/consultations'
     case 'medic-onboarding': return '/medic/onboarding'
     case 'medic-payouts': return '/medic/payouts'
     case 'admin-disputes': return '/admin'

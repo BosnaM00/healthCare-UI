@@ -1,13 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, User, Pill, FileText, ExternalLink, AlertCircle } from 'lucide-react'
+import React, { useState } from 'react'
+import { ArrowLeft, User, Pill, FileText, ExternalLink, AlertCircle, Loader2 } from 'lucide-react'
+import { DailyProvider, useDailyEvent, useMeetingState } from '@daily-co/daily-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { VideoConsoleStrip } from './VideoConsoleStrip'
+import { CallTile } from './CallTile'
 import { NoteEditor } from './NoteEditor'
 import { PrescriptionCard, NewPrescriptionForm } from './PrescriptionCard'
+import { ConsultationFailureBanner } from './ConsultationFailureBanner'
 import {
   useConsultation,
   useConsultationNote,
@@ -15,8 +18,9 @@ import {
   useSaveNote,
   useIssuePrescription,
   useEndConsultation,
+  useJoinToken,
+  useDailyHeartbeat,
 } from '../hooks/use-consultation'
-import { cn } from '@/lib/utils'
 import type { Booking } from '@/types'
 
 interface MedicConsultationWorkspaceProps {
@@ -26,15 +30,21 @@ interface MedicConsultationWorkspaceProps {
   onViewPatient: (patientId: string) => void
 }
 
-export function MedicConsultationWorkspace({
+// ─── Inner workspace — rendered inside DailyProvider ─────────────────────────
+
+interface WorkspaceInnerProps extends MedicConsultationWorkspaceProps {
+  roomUrl: string
+}
+
+function WorkspaceInner({
   consultationId,
   booking,
   onBack,
   onViewPatient,
-}: MedicConsultationWorkspaceProps) {
+  roomUrl: _roomUrl,
+}: WorkspaceInnerProps) {
   const [showNewPrescription, setShowNewPrescription] = useState(false)
   const [callDuration, setCallDuration] = useState(0)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const { data: consultation } = useConsultation(consultationId)
   const { data: note } = useConsultationNote(consultationId)
@@ -43,21 +53,41 @@ export function MedicConsultationWorkspace({
   const { mutateAsync: issuePrescription } = useIssuePrescription(consultationId)
   const { mutate: endConsultation } = useEndConsultation(consultationId)
 
+  const meetingState = useMeetingState()
+  const isInCall = meetingState === 'joined-meeting'
+
+  // Start/stop duration timer based on actual Daily join events
+  useDailyEvent('joined-meeting', () => setCallDuration(0))
+  useDailyEvent(
+    'left-meeting',
+    React.useCallback(() => {
+      endConsultation()
+      onBack()
+    }, [endConsultation, onBack])
+  )
+
+  // Heartbeat while in call
+  useDailyHeartbeat(consultationId, isInCall)
+
   const isInProgress = consultation?.status === 'IN_PROGRESS'
   const isVideo = booking.consultationType === 'VIDEO'
+  const hasFailed =
+    consultation?.status === 'FAILED' || consultation?.status === 'CANCELLED'
 
-  // Call duration timer
-  useEffect(() => {
-    if (isInProgress) {
-      timerRef.current = setInterval(() => setCallDuration((s) => s + 1), 1_000)
-    }
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [isInProgress])
+  // Increment call duration every second while joined
+  React.useEffect(() => {
+    if (!isInCall) return
+    const timer = setInterval(() => setCallDuration((s) => s + 1), 1_000)
+    return () => clearInterval(timer)
+  }, [isInCall])
 
   function handleEndCall() {
-    if (timerRef.current) clearInterval(timerRef.current)
-    endConsultation()
-    onBack()
+    // DailyProvider will fire left-meeting which triggers endConsultation + onBack
+    // If Daily has already left we fall back to direct call
+    if (!isInCall) {
+      endConsultation()
+      onBack()
+    }
   }
 
   const patientName = `Patient #${booking.patientId.slice(-6)}`
@@ -112,46 +142,51 @@ export function MedicConsultationWorkspace({
             </Badge>
             {isVideo && isInProgress && (
               <Badge variant="outline" className="text-xs gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-[--color-success] animate-pulse" aria-hidden="true" />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-[--color-success] animate-pulse"
+                  aria-hidden="true"
+                />
                 Live
               </Badge>
             )}
           </div>
         )}
+
+        {/* Failure banner */}
+        {hasFailed && consultation?.failureReason && (
+          <ConsultationFailureBanner
+            reason={consultation.failureReason}
+            className="mb-4"
+          />
+        )}
+
         <Separator />
       </div>
 
       {/* Main content — split */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Daily.co video embed */}
+        {/* Left: Daily.co video pane */}
         {isVideo && (
           <div
             className="w-[340px] shrink-0 bg-black flex items-center justify-center border-r border-[--color-border] relative"
             aria-label="Video call area"
           >
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/70">
-              {/* Daily.co Prebuilt iframe */}
-              {consultation?.videoRoomId ? (
-                <iframe
-                  src={`https://mediconnect.daily.co/${consultation.videoRoomId}`}
-                  title="Video consultation"
-                  allow="camera; microphone; fullscreen; speaker; display-capture"
-                  className="absolute inset-0 w-full h-full border-0"
-                  aria-label="Daily.co video room"
-                />
-              ) : (
-                <>
-                  <AlertCircle className="h-8 w-8" aria-hidden="true" />
-                  <p className="text-sm text-center px-4">
-                    Video room not yet assigned.<br />Start the consultation to get a link.
-                  </p>
-                </>
-              )}
-            </div>
+            {consultation?.videoRoomUrl ? (
+              <CallTile className="absolute inset-0 w-full h-full" />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3 text-white/70">
+                <AlertCircle className="h-8 w-8" aria-hidden="true" />
+                <p className="text-sm text-center px-4">
+                  Video room not yet assigned.
+                  <br />
+                  Start the consultation to get a link.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Right: Notes, Prescriptions, Info */}
+        {/* Right: Notes, Prescriptions */}
         <div className="flex-1 overflow-auto">
           <Tabs defaultValue="notes" className="h-full flex flex-col">
             <div className="px-6 pt-4 shrink-0">
@@ -229,6 +264,7 @@ export function MedicConsultationWorkspace({
       {/* Bottom: Video console strip */}
       {isVideo && (
         <VideoConsoleStrip
+          role="OWNER"
           isRecording={false}
           durationSeconds={callDuration}
           onEndCall={handleEndCall}
@@ -244,5 +280,59 @@ export function MedicConsultationWorkspace({
         </div>
       )}
     </div>
+  )
+}
+
+// ─── Loading state while token is being fetched ───────────────────────────────
+
+function JoinLoading() {
+  return (
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-var(--topbar-height))] gap-4 text-[--color-text-secondary]">
+      <Loader2 className="h-8 w-8 animate-spin" />
+      <p className="text-sm">Preparing your consultation room…</p>
+    </div>
+  )
+}
+
+// ─── Public wrapper — fetches token, mounts DailyProvider ────────────────────
+
+export function MedicConsultationWorkspace({
+  consultationId,
+  booking,
+  onBack,
+  onViewPatient,
+}: MedicConsultationWorkspaceProps) {
+  const { data: consultation } = useConsultation(consultationId)
+  const joinToken = useJoinToken(consultationId)
+
+  // Auto-fetch token once we have a room URL
+  React.useEffect(() => {
+    if (consultation?.videoRoomUrl && !joinToken.data && !joinToken.isPending) {
+      joinToken.mutate()
+    }
+  }, [consultation?.videoRoomUrl]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // While we have a room URL and are waiting for the token, show a spinner
+  if (consultation?.videoRoomUrl && !joinToken.data) {
+    return <JoinLoading />
+  }
+
+  const roomUrl = joinToken.data?.roomUrl ?? consultation?.videoRoomUrl ?? ''
+  const token = joinToken.data?.token
+
+  return (
+    <DailyProvider
+      url={roomUrl || undefined}
+      token={token}
+      subscribeToTracksAutomatically
+    >
+      <WorkspaceInner
+        consultationId={consultationId}
+        booking={booking}
+        onBack={onBack}
+        onViewPatient={onViewPatient}
+        roomUrl={roomUrl}
+      />
+    </DailyProvider>
   )
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
   ChevronLeft, Calendar, Clock, Video, MapPin, CreditCard,
-  AlertTriangle, CheckCircle2, XCircle, Loader2,
+  AlertTriangle, CheckCircle2, XCircle,
 } from 'lucide-react'
 import { useBooking, useCancelBooking } from '../hooks/use-booking'
 import { Button } from '@/components/ui/button'
@@ -15,13 +15,21 @@ import {
 } from '@/components/ui/dialog'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { StripeStatusBadge } from '@/features/payments/StripeStatusBadge'
+import { ConsultationJoinButton } from '@/features/consultation/components/ConsultationJoinButton'
 
 interface BookingDetailPageProps {
   bookingId: string
+  consultationId?: string
   onBack?: () => void
+  onJoinConsultation?: (consultationId: string) => void
 }
 
-export function BookingDetailPage({ bookingId, onBack }: BookingDetailPageProps) {
+export function BookingDetailPage({
+  bookingId,
+  consultationId,
+  onBack,
+  onJoinConsultation,
+}: BookingDetailPageProps) {
   const { data: booking, isLoading } = useBooking(bookingId)
   const cancel = useCancelBooking()
   const [showCancelDialog, setShowCancelDialog] = useState(false)
@@ -163,13 +171,25 @@ export function BookingDetailPage({ bookingId, onBack }: BookingDetailPageProps)
       {/* Actions */}
       {isCancellable && isUpcoming && (
         <div className="flex gap-3">
-          {booking.consultationType === 'VIDEO' && (
-            <Button className="flex-1 gap-2" disabled aria-label="Join video call — available at appointment time">
+          {booking.consultationType === 'VIDEO' && consultationId && onJoinConsultation ? (
+            <ConsultationJoinButton
+              consultationId={consultationId}
+              role="PATIENT"
+              scheduledStart={booking.slot.startTime}
+              onJoin={() => onJoinConsultation(consultationId)}
+              className="flex-1"
+            />
+          ) : booking.consultationType === 'VIDEO' ? (
+            <Button
+              className="flex-1 gap-2"
+              disabled
+              aria-label="Join video call — available at appointment time"
+            >
               <Video className="h-4 w-4" />
               Join consultation
               <span className="text-xs opacity-70">(available at start time)</span>
             </Button>
-          )}
+          ) : null}
           <Button
             variant="outline"
             className="gap-2 text-[--color-danger] border-[--color-danger]/30 hover:bg-[--color-danger]/5"

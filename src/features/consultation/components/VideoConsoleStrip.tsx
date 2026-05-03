@@ -1,14 +1,24 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
   Mic, MicOff, Video, VideoOff, PhoneOff, MonitorUp,
-  Circle, MoreHorizontal, Users,
+  Circle, MoreHorizontal, Users, Wifi, WifiOff,
 } from 'lucide-react'
+import {
+  useLocalParticipant,
+  useNetwork,
+  useScreenShare,
+  useParticipantIds,
+  useDaily,
+  useMeetingState,
+} from '@daily-co/daily-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 
 interface VideoConsoleStripProps {
+  /** OWNER = medic; PARTICIPANT = patient */
+  role?: 'OWNER' | 'PARTICIPANT'
   isRecording?: boolean
   durationSeconds?: number
   participantCount?: number
@@ -23,17 +33,90 @@ function formatDuration(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
+// ─── Network quality dot ───────────────────────────────────────────────────────
+
+function NetworkDot({ quality }: { quality: string | undefined }) {
+  const classes =
+    quality === 'good'
+      ? 'bg-[--color-success]'
+      : quality === 'low'
+        ? 'bg-[--color-warning]'
+        : quality === 'very-low'
+          ? 'bg-[--color-danger] animate-pulse'
+          : 'bg-[--color-neutral-400]'
+
+  const label =
+    quality === 'good'
+      ? 'Good network'
+      : quality === 'low'
+        ? 'Low network quality'
+        : quality === 'very-low'
+          ? 'Very low network quality'
+          : 'Network quality unknown'
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-center gap-1 cursor-default" aria-label={label}>
+          {quality === 'very-low' ? (
+            <WifiOff className="h-4 w-4 text-[--color-danger]" />
+          ) : (
+            <Wifi className={cn('h-4 w-4', quality === 'low' ? 'text-[--color-warning]' : 'text-[--color-text-tertiary]')} />
+          )}
+          <span className={cn('h-2 w-2 rounded-full', classes)} aria-hidden="true" />
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+// ─── Main strip ───────────────────────────────────────────────────────────────
+
 export function VideoConsoleStrip({
+  role = 'PARTICIPANT',
   isRecording = false,
   durationSeconds = 0,
-  participantCount = 2,
   onEndCall,
-  onToggleScreenShare,
   className,
 }: VideoConsoleStripProps) {
-  const [micMuted, setMicMuted] = useState(false)
-  const [videoOff, setVideoOff] = useState(false)
-  const [sharing, setSharing] = useState(false)
+  const call = useDaily()
+  const meetingState = useMeetingState()
+  const localParticipant = useLocalParticipant()
+  const remoteIds = useParticipantIds({ filter: 'remote' })
+  const { screens, startScreenShare, stopScreenShare, isSharingScreen } = useScreenShare()
+  const { threshold: networkQuality } = useNetwork()
+
+  const isInCall = meetingState === 'joined-meeting'
+  const micMuted = localParticipant?.audio === false
+  const camOff = localParticipant?.video === false
+  const participantCount = 1 + remoteIds.length + screens.length
+
+  function toggleMic() {
+    if (!call) return
+    call.setLocalAudio(micMuted)
+  }
+
+  function toggleCamera() {
+    if (!call) return
+    call.setLocalVideo(camOff)
+  }
+
+  function toggleScreenShare() {
+    if (isSharingScreen) {
+      stopScreenShare()
+    } else {
+      startScreenShare()
+    }
+  }
+
+  function handleEndCall() {
+    if (call && isInCall) {
+      call.leave()
+    } else {
+      onEndCall()
+    }
+  }
 
   return (
     <TooltipProvider>
@@ -46,22 +129,25 @@ export function VideoConsoleStrip({
         aria-label="Video call controls"
       >
         {/* Left — call status */}
-        <div className="flex items-center gap-3 min-w-[140px]">
+        <div className="flex items-center gap-3 min-w-[160px]">
           {isRecording && (
             <div className="flex items-center gap-1.5 text-danger text-sm font-medium">
               <Circle className="h-2 w-2 fill-danger text-danger animate-pulse" aria-hidden="true" />
               REC
             </div>
           )}
-          <span className="font-mono text-sm text-[--color-text-secondary]" aria-live="off">
+          <span
+            className="font-mono text-sm text-[--color-text-secondary]"
+            aria-live="off"
+            aria-label={`Call duration ${formatDuration(durationSeconds)}`}
+          >
             {formatDuration(durationSeconds)}
           </span>
-          <span className="sr-only">Call duration</span>
           <div className="flex items-center gap-1 text-[--color-text-tertiary] text-sm">
             <Users className="h-4 w-4" aria-hidden="true" />
-            <span>{participantCount}</span>
-            <span className="sr-only">participants</span>
+            <span aria-label={`${participantCount} participants`}>{participantCount}</span>
           </div>
+          <NetworkDot quality={networkQuality} />
         </div>
 
         {/* Center — primary controls */}
@@ -71,7 +157,8 @@ export function VideoConsoleStrip({
               <Button
                 variant={micMuted ? 'destructive' : 'outline'}
                 size="icon"
-                onClick={() => setMicMuted((v) => !v)}
+                onClick={toggleMic}
+                disabled={!isInCall}
                 aria-pressed={micMuted}
                 aria-label={micMuted ? 'Unmute microphone' : 'Mute microphone'}
               >
@@ -84,42 +171,44 @@ export function VideoConsoleStrip({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant={videoOff ? 'destructive' : 'outline'}
+                variant={camOff ? 'destructive' : 'outline'}
                 size="icon"
-                onClick={() => setVideoOff((v) => !v)}
-                aria-pressed={videoOff}
-                aria-label={videoOff ? 'Turn on camera' : 'Turn off camera'}
+                onClick={toggleCamera}
+                disabled={!isInCall}
+                aria-pressed={camOff}
+                aria-label={camOff ? 'Turn on camera' : 'Turn off camera'}
               >
-                {videoOff ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+                {camOff ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{videoOff ? 'Start video' : 'Stop video'}</TooltipContent>
+            <TooltipContent>{camOff ? 'Start video' : 'Stop video'}</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={sharing ? 'default' : 'outline'}
-                size="icon"
-                onClick={() => {
-                  setSharing((v) => !v)
-                  onToggleScreenShare?.()
-                }}
-                aria-pressed={sharing}
-                aria-label={sharing ? 'Stop sharing screen' : 'Share screen'}
-              >
-                <MonitorUp className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{sharing ? 'Stop sharing' : 'Share screen'}</TooltipContent>
-          </Tooltip>
+          {/* Screen share — OWNER (medic) only */}
+          {role === 'OWNER' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={isSharingScreen ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={toggleScreenShare}
+                  disabled={!isInCall}
+                  aria-pressed={isSharingScreen}
+                  aria-label={isSharingScreen ? 'Stop sharing screen' : 'Share screen'}
+                >
+                  <MonitorUp className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{isSharingScreen ? 'Stop sharing' : 'Share screen'}</TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="destructive"
                 size="icon"
-                onClick={onEndCall}
+                onClick={handleEndCall}
                 aria-label="End call"
                 className="bg-danger hover:bg-danger/90"
               >
@@ -131,7 +220,7 @@ export function VideoConsoleStrip({
         </div>
 
         {/* Right — badges */}
-        <div className="flex items-center gap-2 min-w-[140px] justify-end">
+        <div className="flex items-center gap-2 min-w-[160px] justify-end">
           {isRecording && (
             <Badge variant="destructive" className="text-xs">
               Recording

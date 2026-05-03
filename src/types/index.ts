@@ -89,16 +89,46 @@ export interface Booking {
 }
 
 // ─── Consultation ─────────────────────────────────────────────────────────────
-export type ConsultationStatus = 'WAITING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+export type ConsultationStatus =
+  | 'WAITING'
+  | 'SCHEDULED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'FAILED'
+  | 'DISPUTED'
+
+export type ConsultationFailureReason =
+  | 'MEDIC_NO_SHOW'
+  | 'PATIENT_NO_SHOW'
+  | 'TECHNICAL_FAILURE'
+  | 'MUTUAL_CANCEL'
+  | 'OTHER'
 
 export interface Consultation {
   id: string
   bookingId: string
   status: ConsultationStatus
-  videoRoomId?: string
-  startedAt?: string
-  endedAt?: string
-  durationSeconds?: number
+  videoRoomId?: string | null
+  videoRoomUrl?: string | null       // full Daily.co room URL for clients
+  videoProvider?: 'daily' | null     // forward-compat for provider swap
+  startedAt?: string | null
+  endedAt?: string | null
+  durationSeconds?: number | null
+  failureReason?: ConsultationFailureReason | null
+}
+
+export interface JoinTokenResponse {
+  roomUrl: string
+  token: string
+  role: 'OWNER' | 'PARTICIPANT'
+  expiresAt: string
+}
+
+export interface ConsultationDiagnostics {
+  consultationId: string
+  webhookTimestamps: Record<string, string>
+  heartbeatSamples: { ts: string; networkRttMs?: number; mediaState?: string }[]
 }
 
 // ─── Prescription ─────────────────────────────────────────────────────────────
