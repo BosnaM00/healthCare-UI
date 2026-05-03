@@ -61,7 +61,9 @@ export function BookingDetailPage({
   const startTime = new Date(booking.slot.startTime)
   const endTime = new Date(booking.slot.endTime)
   const isCancellable = booking.bookingStatus === 'CONFIRMED' || booking.bookingStatus === 'SCHEDULED'
-  const isUpcoming = new Date(booking.slot.startTime) > new Date()
+  // Within the join window: up to 30 min after scheduled start (matches ConsultationJoinButton logic)
+  const JOIN_WINDOW_AFTER_MIN = 30
+  const isUpcoming = new Date(booking.slot.startTime) > new Date(Date.now() - JOIN_WINDOW_AFTER_MIN * 60_000)
   const initials = medic
     ? `${medic.firstName[0] ?? ''}${medic.lastName[0] ?? ''}`.toUpperCase()
     : '?'

@@ -196,6 +196,7 @@ function NextAppointmentHero({
                 size="sm"
                 className="bg-white text-[--color-brand-700] hover:bg-white/90 font-semibold"
                 aria-label="Join video consultation"
+                onClick={() => onView?.(booking.id)}
               >
                 <Video className="h-4 w-4 mr-1.5" />
                 Join now
