@@ -8,7 +8,9 @@ interface LoginResponse {
   token: string
   userId: string
   role: User['role']
-  user: User
+  email: string
+  firstName: string
+  lastName: string
   requiresMfa?: boolean
 }
 
@@ -20,8 +22,15 @@ export function useLogin() {
       api.post<LoginResponse>('/auth/login', credentials),
     onSuccess: (data) => {
       if (!data.requiresMfa) {
-        setUser(data.user, data.token)
-        toast({ title: 'Welcome back!', description: `Signed in as ${data.user.firstName}`, variant: 'default' })
+        const user: User = {
+          id: data.userId,
+          email: data.email,
+          role: data.role,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        }
+        setUser(user, data.token)
+        toast({ title: 'Welcome back!', description: `Signed in as ${data.firstName}`, variant: 'default' })
       }
     },
     onError: (error) => {
