@@ -2,7 +2,7 @@ import { http, HttpResponse, delay } from 'msw'
 import { mockBookings, mockMedics, mockSlots } from '../fixtures'
 import type { Booking } from '@/types'
 
-const BASE = 'http://localhost:8080/api'
+const BASE = 'http://localhost:8080/api/v1'
 
 const bookingsDB: Booking[] = [...mockBookings]
 

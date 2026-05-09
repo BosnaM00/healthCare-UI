@@ -2,7 +2,7 @@ import { http, HttpResponse, delay } from 'msw'
 import { mockUsers } from '../fixtures'
 import type { User } from '@/types'
 
-const BASE = 'http://localhost:8080/api'
+const BASE = 'http://localhost:8080/api/v1'
 
 const usersDB: User[] = [...mockUsers]
 

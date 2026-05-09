@@ -2,7 +2,7 @@ import { http, HttpResponse, delay } from 'msw'
 import type { Medic, MedicInvite, EarningsSummary, EarningTransaction, Booking } from '@/types'
 import { mockMedics, mockSlots } from '../fixtures'
 
-const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api'
+const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1'
 
 const mockInvites: MedicInvite[] = [
   {

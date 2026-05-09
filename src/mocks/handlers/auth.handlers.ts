@@ -1,7 +1,7 @@
 import { http, HttpResponse, delay } from 'msw'
 import { mockUsers } from '../fixtures'
 
-const BASE = 'http://localhost:8080/api'
+const BASE = 'http://localhost:8080/api/v1'
 
 export const authHandlers = [
   // POST /auth/login

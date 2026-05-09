@@ -2,7 +2,7 @@ import { http, HttpResponse, delay } from 'msw'
 import type { MedicStripeStatus, Payment, PaymentIntentResponse, PayoutRecord } from '@/types'
 import type { Page } from '@/types'
 
-const BASE = 'http://localhost:8080/api'
+const BASE = 'http://localhost:8080/api/v1'
 
 // In-memory payment store for mock
 const payments = new Map<string, Payment>()
@@ -36,7 +36,7 @@ const mockPayouts: PayoutRecord[] = [
 
 export const paymentsHandlers = [
   // POST /v1/payments/intents — create PaymentIntent
-  http.post(`${BASE}/v1/payments/intents`, async ({ request }) => {
+  http.post(`${BASE}/payments/intents`, async ({ request }) => {
     await delay(600)
     const body = await request.json() as { bookingId: string }
 
@@ -66,7 +66,7 @@ export const paymentsHandlers = [
   }),
 
   // GET /v1/payments/:id
-  http.get(`${BASE}/v1/payments/:id`, async ({ params }) => {
+  http.get(`${BASE}/payments/:id`, async ({ params }) => {
     await delay(200)
     const payment = payments.get(params['id'] as string)
     if (!payment) {
@@ -89,7 +89,7 @@ export const paymentsHandlers = [
   }),
 
   // POST /v1/payments/:id/refund
-  http.post(`${BASE}/v1/payments/:id/refund`, async ({ params }) => {
+  http.post(`${BASE}/payments/:id/refund`, async ({ params }) => {
     await delay(800)
     const payment = payments.get(params['id'] as string)
     if (payment) {
@@ -100,7 +100,7 @@ export const paymentsHandlers = [
   }),
 
   // POST /v1/medics/me/stripe/onboarding — returns onboarding URL
-  http.post(`${BASE}/v1/medics/me/stripe/onboarding`, async () => {
+  http.post(`${BASE}/medics/me/stripe/onboarding`, async () => {
     await delay(500)
     // In dev, redirect back to the app's medic-onboarding-return path
     return HttpResponse.json({
@@ -109,13 +109,13 @@ export const paymentsHandlers = [
   }),
 
   // GET /v1/medics/me/stripe/status
-  http.get(`${BASE}/v1/medics/me/stripe/status`, async () => {
+  http.get(`${BASE}/medics/me/stripe/status`, async () => {
     await delay(300)
     return HttpResponse.json(mockStripeStatus)
   }),
 
   // GET /v1/medics/me/payouts
-  http.get(`${BASE}/v1/medics/me/payouts`, async ({ request }) => {
+  http.get(`${BASE}/medics/me/payouts`, async ({ request }) => {
     await delay(400)
     const url = new URL(request.url)
     const page = parseInt(url.searchParams.get('page') ?? '0')

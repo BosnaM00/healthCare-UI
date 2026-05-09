@@ -5,7 +5,7 @@ import type {
   VitalReading, PatientDocument, PatientDetail, TimelineEvent,
 } from '@/types'
 
-const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api'
+const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1'
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
@@ -14,15 +14,15 @@ const mockConsultation: Consultation = {
   bookingId: 'book-1',   // matches mockBookings[0].id in fixtures.ts
   status: 'IN_PROGRESS',
   videoRoomId: 'mediconnect-test-room',
-  videoRoomUrl: 'https://mediconnect.daily.co/mediconnect-test-room',
+  videoRoomUrl: 'https://mediconnect-test.daily.co/mediconnect-test-room',
   videoProvider: 'daily',
   startedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
   failureReason: null,
 }
 
 const mockJoinToken: JoinTokenResponse = {
-  roomUrl: 'https://mediconnect.daily.co/mediconnect-test-room',
-  token: 'mock-daily-token-abc123',
+  roomUrl: 'https://mediconnect-test.daily.co/mediconnect-test-room',
+  token: '',   // Public room — no token required
   role: 'PARTICIPANT',
   expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
 }

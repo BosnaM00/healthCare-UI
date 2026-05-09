@@ -19,7 +19,7 @@ function optionalEnv(key: string, defaultValue: string): string {
 }
 
 export const env = {
-  apiUrl: optionalEnv('VITE_API_URL', 'http://localhost:8080/api'),
+  apiUrl: optionalEnv('VITE_API_URL', 'http://localhost:8080/api/v1'),
 
   /** Stripe publishable key. Throws if missing. */
   stripePublishableKey: (): string => requireEnv('VITE_STRIPE_PUBLISHABLE_KEY'),

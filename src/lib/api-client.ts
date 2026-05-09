@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/stores/auth.store'
 import type { ProblemDetail } from '@/types'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api'
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1'
 
 export class ApiError extends Error {
   constructor(
