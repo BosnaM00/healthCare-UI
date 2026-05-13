@@ -182,7 +182,7 @@ function NextAppointmentHero({
               <div>
                 <p className="font-medium text-sm">Dr. {medic.firstName} {medic.lastName}</p>
                 <p className="text-xs opacity-80">
-                  {medic.specialties[0]?.name} · {booking.consultationType}
+                  {medic.specialties?.[0]?.name} · {booking.consultationType}
                 </p>
               </div>
             </div>
