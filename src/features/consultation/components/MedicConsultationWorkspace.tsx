@@ -337,8 +337,10 @@ export function MedicConsultationWorkspace({
   const { data: consultation } = useConsultation(consultationId)
   const joinToken = useJoinToken(consultationId)
 
-  // Auto-fetch OWNER token once the room URL is available, but not for ended consultations
-  const isJoinable = consultation?.status === 'SCHEDULED' || consultation?.status === 'IN_PROGRESS'
+  // Only fetch a join token once the medic has started the consultation (IN_PROGRESS).
+  // Fetching in SCHEDULED state causes Daily to attempt a real connection immediately,
+  // which fails on stub/non-existent rooms and triggers an erroneous /complete call.
+  const isJoinable = consultation?.status === 'IN_PROGRESS'
   React.useEffect(() => {
     if (consultation?.videoRoomUrl && isJoinable && !joinToken.data && !joinToken.isPending) {
       joinToken.mutate()
