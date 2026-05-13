@@ -121,7 +121,7 @@ export function BookingDetailPage({
               Dr. {medic?.firstName} {medic?.lastName}
             </p>
             <p className="text-sm text-[--color-text-secondary]">
-              {medic?.specialties.map((s) => s.name).join(', ')}
+              {medic?.specialties?.map((s) => s.name).join(', ')}
             </p>
             {medic?.clinicName && (
               <p className="text-xs text-[--color-text-secondary] flex items-center gap-1 mt-0.5">
