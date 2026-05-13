@@ -337,12 +337,13 @@ export function MedicConsultationWorkspace({
   const { data: consultation } = useConsultation(consultationId)
   const joinToken = useJoinToken(consultationId)
 
-  // Auto-fetch OWNER token once the room URL is available
+  // Auto-fetch OWNER token once the room URL is available, but not for ended consultations
+  const isJoinable = consultation?.status === 'SCHEDULED' || consultation?.status === 'IN_PROGRESS'
   React.useEffect(() => {
-    if (consultation?.videoRoomUrl && !joinToken.data && !joinToken.isPending) {
+    if (consultation?.videoRoomUrl && isJoinable && !joinToken.data && !joinToken.isPending) {
       joinToken.mutate()
     }
-  }, [consultation?.videoRoomUrl]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [consultation?.videoRoomUrl, isJoinable]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const roomUrl = joinToken.data?.roomUrl ?? ''
   // token may be empty string for public rooms — treat undefined (not yet fetched) as absent
