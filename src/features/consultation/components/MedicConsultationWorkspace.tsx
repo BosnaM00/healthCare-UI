@@ -78,9 +78,9 @@ function WorkspaceInner({
   useDailyEvent(
     'left-meeting',
     React.useCallback(() => {
-      endConsultation()
+      endConsultation(callDuration)
       onBack()
-    }, [endConsultation, onBack])
+    }, [endConsultation, onBack, callDuration])
   )
 
   // Heartbeat while in call
@@ -103,7 +103,7 @@ function WorkspaceInner({
     // DailyProvider will fire left-meeting which triggers endConsultation + onBack
     // If Daily has already left we fall back to direct call
     if (!isInCall) {
-      endConsultation()
+      endConsultation(callDuration)
       onBack()
     }
   }

@@ -101,7 +101,8 @@ export function useStartConsultation() {
 export function useEndConsultation(consultationId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => api.post(`/consultations/${consultationId}/end`, {}),
+    mutationFn: (durationSeconds: number) =>
+      api.post(`/consultations/${consultationId}/complete?durationSeconds=${durationSeconds}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['consultation', consultationId] }),
   })
 }
