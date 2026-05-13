@@ -18,6 +18,7 @@ import {
   useConsultationPrescriptions,
   useSaveNote,
   useIssuePrescription,
+  useStartConsultation,
   useEndConsultation,
   useJoinToken,
   useDailyHeartbeat,
@@ -66,6 +67,7 @@ function WorkspaceInner({
   const { data: prescriptions = [] } = useConsultationPrescriptions(consultationId)
   const { mutateAsync: saveNote } = useSaveNote(consultationId)
   const { mutateAsync: issuePrescription } = useIssuePrescription(consultationId)
+  const { mutate: startConsultation, isPending: isStarting } = useStartConsultation()
   const { mutate: endConsultation } = useEndConsultation(consultationId)
 
   const meetingState = useMeetingState()
@@ -84,6 +86,7 @@ function WorkspaceInner({
   // Heartbeat while in call
   useDailyHeartbeat(consultationId, isInCall)
 
+  const isScheduled = consultation?.status === 'SCHEDULED'
   const isInProgress = consultation?.status === 'IN_PROGRESS'
   const isVideo = booking.consultationType === 'VIDEO'
   const hasFailed =
@@ -163,6 +166,17 @@ function WorkspaceInner({
                 />
                 Live
               </Badge>
+            )}
+            {isScheduled && (
+              <Button
+                size="sm"
+                onClick={() => startConsultation(booking.id)}
+                disabled={isStarting}
+                className="gap-1.5"
+              >
+                {isStarting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+                Start Consultation
+              </Button>
             )}
           </div>
         )}
