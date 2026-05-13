@@ -93,7 +93,7 @@ export function useStartConsultation() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (bookingId: string) =>
-      api.post<Consultation>(`/consultations/start`, { bookingId }),
+      api.post<Consultation>(`/consultations/start?bookingId=${bookingId}`),
     onSuccess: (data) => qc.setQueryData(['consultation', data.id], data),
   })
 }
