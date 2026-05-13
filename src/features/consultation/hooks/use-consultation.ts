@@ -31,7 +31,7 @@ export function useConsultation(consultationId: string) {
 export function useConsultationNote(consultationId: string) {
   return useQuery({
     queryKey: ['consultation-note', consultationId],
-    queryFn: () => api.get<ConsultationNote>(`/consultations/${consultationId}/note`),
+    queryFn: () => api.get<ConsultationNote>(`/consultations/${consultationId}/notes`),
     enabled: !!consultationId,
   })
 }
@@ -39,7 +39,7 @@ export function useConsultationNote(consultationId: string) {
 export function useConsultationPrescriptions(consultationId: string) {
   return useQuery({
     queryKey: ['consultation-prescriptions', consultationId],
-    queryFn: () => api.get<Prescription[]>(`/consultations/${consultationId}/prescriptions`),
+    queryFn: () => api.get<Prescription[]>(`/prescriptions/consultation/${consultationId}`),
     enabled: !!consultationId,
   })
 }
@@ -74,7 +74,7 @@ export function useSaveNote(consultationId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: { content: string; template: string }) =>
-      api.put<ConsultationNote>(`/consultations/${consultationId}/note`, payload),
+      api.put(`/consultations/${consultationId}/notes`, { notes: payload.content }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['consultation-note', consultationId] }),
   })
 }
@@ -83,7 +83,7 @@ export function useIssuePrescription(consultationId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: unknown) =>
-      api.post<Prescription>(`/consultations/${consultationId}/prescriptions`, payload),
+      api.post<Prescription>(`/prescriptions/consultation/${consultationId}`, payload),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ['consultation-prescriptions', consultationId] }),
   })

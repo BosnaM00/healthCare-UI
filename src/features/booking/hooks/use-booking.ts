@@ -47,7 +47,7 @@ export function useMedicSlots(medicId?: string) {
 export function useMyBookings() {
   return useQuery({
     queryKey: ['bookings'],
-    queryFn: () => api.get<Page<Booking>>('/bookings'),
+    queryFn: () => api.get<Page<Booking>>('/bookings/my'),
   })
 }
 

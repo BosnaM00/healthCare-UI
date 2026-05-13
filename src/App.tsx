@@ -69,7 +69,7 @@ type Route =
   | { id: 'medic-dashboard' }
   | { id: 'medic-patients' }
   | { id: 'patient-detail'; patientId: string }
-  | { id: 'consultation'; consultationId: string; booking: Booking }
+  | { id: 'consultation'; bookingId: string; booking: Booking }
   | { id: 'patient-consultation'; consultationId: string; bookingId: string; booking: Booking }
   | { id: 'medic-onboarding' }
   | { id: 'medic-payouts' }
@@ -245,7 +245,7 @@ export default function App() {
         return (
           <BookingDetailPage
             bookingId={route.bookingId}
-            consultationId={route.booking ? 'consult-1' : undefined}
+            consultationId={undefined}
             onBack={() => setRoute({ id: 'dashboard' })}
             onJoinConsultation={(consultationId) =>
               setRoute({
@@ -322,27 +322,8 @@ export default function App() {
         return (
           <MedicDashboard
             onViewPatient={(patientId) => setRoute({ id: 'patient-detail', patientId })}
-            onStartConsultation={(bookingId) => {
-              // In a real app, we'd fetch the booking and consultation ID
-              // Here we route directly to a placeholder consultation
-              setRoute({ id: 'consultation', consultationId: 'consult-1', booking: {
-                id: bookingId,
-                patientId: 'usr-patient-1',
-                medicId: 'med-1',
-                slotId: 'slot-1',
-                consultationType: 'VIDEO',
-                paymentStatus: 'CAPTURED',
-                bookingStatus: 'CONFIRMED',
-                createdAt: new Date().toISOString(),
-                slot: {
-                  id: 'slot-1',
-                  medicId: 'med-1',
-                  startTime: new Date().toISOString(),
-                  endTime: new Date(Date.now() + 1800_000).toISOString(),
-                  consultationType: 'VIDEO',
-                  available: false,
-                },
-              }})
+            onStartConsultation={(bookingId, booking) => {
+              setRoute({ id: 'consultation', bookingId, booking })
             }}
             onViewSchedule={() => setRoute({ id: 'medic-dashboard' })}
           />
@@ -371,33 +352,14 @@ export default function App() {
           <PatientDetailPage
             patientId={route.patientId}
             onBack={() => setRoute({ id: 'medic-patients' })}
-            onStartConsultation={(patientId) =>
-              setRoute({ id: 'consultation', consultationId: 'consult-1', booking: {
-                id: 'bk-new',
-                patientId,
-                medicId: 'med-1',
-                slotId: 'slot-1',
-                consultationType: 'VIDEO',
-                paymentStatus: 'CAPTURED',
-                bookingStatus: 'CONFIRMED',
-                createdAt: new Date().toISOString(),
-                slot: {
-                  id: 'slot-1',
-                  medicId: 'med-1',
-                  startTime: new Date().toISOString(),
-                  endTime: new Date(Date.now() + 1800_000).toISOString(),
-                  consultationType: 'VIDEO',
-                  available: false,
-                },
-              }})
-            }
+            onStartConsultation={() => setRoute({ id: 'medic-dashboard' })}
           />
         )
 
       case 'consultation':
         return (
           <MedicConsultationWorkspace
-            consultationId={route.consultationId}
+            bookingId={route.bookingId}
             booking={route.booking}
             onBack={() => setRoute({ id: 'medic-dashboard' })}
             onViewPatient={(patientId) => setRoute({ id: 'patient-detail', patientId })}

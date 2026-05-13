@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ArrowLeft, User, Pill, FileText, ExternalLink, AlertCircle, Loader2 } from 'lucide-react'
-import { DailyProvider, useDailyEvent, useMeetingState } from '@daily-co/daily-react'
+import { DailyProvider, useDaily, useDailyEvent, useMeetingState } from '@daily-co/daily-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -13,6 +13,7 @@ import { PrescriptionCard, NewPrescriptionForm } from './PrescriptionCard'
 import { ConsultationFailureBanner } from './ConsultationFailureBanner'
 import {
   useConsultation,
+  useConsultationByBookingId,
   useConsultationNote,
   useConsultationPrescriptions,
   useSaveNote,
@@ -24,7 +25,7 @@ import {
 import type { Booking } from '@/types'
 
 interface MedicConsultationWorkspaceProps {
-  consultationId: string
+  bookingId: string
   booking: Booking
   onBack: () => void
   onViewPatient: (patientId: string) => void
@@ -32,8 +33,13 @@ interface MedicConsultationWorkspaceProps {
 
 // ─── Inner workspace — rendered inside DailyProvider ─────────────────────────
 
-interface WorkspaceInnerProps extends MedicConsultationWorkspaceProps {
+interface WorkspaceInnerProps {
+  consultationId: string
+  booking: Booking
+  onBack: () => void
+  onViewPatient: (patientId: string) => void
   roomUrl: string
+  token?: string
 }
 
 function WorkspaceInner({
@@ -41,10 +47,19 @@ function WorkspaceInner({
   booking,
   onBack,
   onViewPatient,
-  roomUrl: _roomUrl,
+  roomUrl,
+  token,
 }: WorkspaceInnerProps) {
   const [showNewPrescription, setShowNewPrescription] = useState(false)
   const [callDuration, setCallDuration] = useState(0)
+
+  const call = useDaily()
+
+  // Join the Daily.co room once the call object is ready
+  React.useEffect(() => {
+    if (!call || !roomUrl) return
+    call.join({ url: roomUrl, ...(token ? { token } : {}) })
+  }, [call]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: consultation } = useConsultation(consultationId)
   const { data: note } = useConsultationNote(consultationId)
@@ -297,11 +312,14 @@ function JoinLoading() {
 // ─── Public wrapper — fetches token, mounts DailyProvider ────────────────────
 
 export function MedicConsultationWorkspace({
-  consultationId,
+  bookingId,
   booking,
   onBack,
   onViewPatient,
 }: MedicConsultationWorkspaceProps) {
+  const { data: resolved } = useConsultationByBookingId(bookingId)
+  const consultationId = resolved?.id ?? ''
+
   const { data: consultation } = useConsultation(consultationId)
   const joinToken = useJoinToken(consultationId)
 
@@ -313,10 +331,11 @@ export function MedicConsultationWorkspace({
   }, [consultation?.videoRoomUrl]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const roomUrl = joinToken.data?.roomUrl ?? ''
-  const token = joinToken.data?.token
+  // token may be empty string for public rooms — treat undefined (not yet fetched) as absent
+  const token = joinToken.data?.token ?? ''
 
   // No room yet — render workspace shell without Daily (video pane shows placeholder)
-  if (!roomUrl || !token) {
+  if (!roomUrl || joinToken.data === undefined) {
     return (
       <DailyProvider callObject={null}>
         <WorkspaceInner
@@ -330,11 +349,11 @@ export function MedicConsultationWorkspace({
     )
   }
 
-  // Room + token ready — mount a live Daily call
+  // Room URL ready — mount a live Daily call
   return (
     <DailyProvider
       url={roomUrl}
-      token={token}
+      {...(token ? { token } : {})}
       subscribeToTracksAutomatically
     >
       <WorkspaceInner
@@ -343,6 +362,7 @@ export function MedicConsultationWorkspace({
         onBack={onBack}
         onViewPatient={onViewPatient}
         roomUrl={roomUrl}
+        token={token}
       />
     </DailyProvider>
   )

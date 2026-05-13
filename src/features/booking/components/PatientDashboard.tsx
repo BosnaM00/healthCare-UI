@@ -29,12 +29,19 @@ export function PatientDashboard({ onFindMedic, onViewBooking }: PatientDashboar
   const { data, isLoading } = useMyBookings()
 
   const bookings = data?.content ?? []
-  const upcoming = bookings.filter(
-    (b) => b.bookingStatus === 'CONFIRMED' || b.bookingStatus === 'SCHEDULED'
-  ).sort((a, b) => new Date(a.slot.startTime).getTime() - new Date(b.slot.startTime).getTime())
+  const now = new Date()
+  const upcoming = bookings
+    .filter((b) =>
+      b.paymentStatus !== 'REFUNDED' &&
+      b.paymentStatus !== 'FAILED' &&
+      new Date(b.slot.startTime) > now
+    )
+    .sort((a, b) => new Date(a.slot.startTime).getTime() - new Date(b.slot.startTime).getTime())
 
   const nextAppointment = upcoming[0] ?? null
-  const pastBookings = bookings.filter((b) => b.bookingStatus === 'COMPLETED').slice(0, 3)
+  const pastBookings = bookings
+    .filter((b) => new Date(b.slot.startTime) <= now && b.paymentStatus !== 'REFUNDED')
+    .slice(0, 3)
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -71,7 +78,7 @@ export function PatientDashboard({ onFindMedic, onViewBooking }: PatientDashboar
         {[
           { label: 'Total bookings', value: bookings.length, icon: <Calendar className="h-5 w-5" /> },
           { label: 'Upcoming', value: upcoming.length, icon: <Clock className="h-5 w-5" /> },
-          { label: 'Completed', value: bookings.filter(b => b.bookingStatus === 'COMPLETED').length, icon: <Stethoscope className="h-5 w-5" /> },
+          { label: 'Completed', value: bookings.filter(b => new Date(b.slot.startTime) <= now && b.paymentStatus !== 'REFUNDED').length, icon: <Stethoscope className="h-5 w-5" /> },
           { label: 'Video consults', value: bookings.filter(b => b.consultationType === 'VIDEO').length, icon: <Video className="h-5 w-5" /> },
         ].map((stat) => (
           <div
@@ -220,7 +227,12 @@ function NextAppointmentHero({
 function BookingRow({ booking, onView }: { booking: Booking; onView?: (id: string) => void }) {
   const startTime = new Date(booking.slot.startTime)
   const medic = booking.medic
-  const status = STATUS_BADGE[booking.bookingStatus]
+  const isPast = startTime <= new Date()
+  const derivedStatus: keyof typeof STATUS_BADGE =
+    booking.paymentStatus === 'REFUNDED' ? 'CANCELLED'
+    : isPast ? 'COMPLETED'
+    : 'SCHEDULED'
+  const status = STATUS_BADGE[derivedStatus]
   const initials = medic
     ? `${medic.firstName[0] ?? ''}${medic.lastName[0] ?? ''}`.toUpperCase()
     : '?'

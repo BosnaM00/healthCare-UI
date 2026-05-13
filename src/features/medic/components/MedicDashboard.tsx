@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useMedicUpcomingBookings, useMedicEarningsSummary } from '../hooks/use-medic'
 import { useAuthStore } from '@/stores/auth.store'
+import type { Booking } from '@/types'
 import { cn } from '@/lib/utils'
 
 function MetricCard({
@@ -50,7 +51,7 @@ function BookingStatusDot({ status }: { status: string }) {
 
 interface MedicDashboardProps {
   onViewPatient: (patientId: string) => void
-  onStartConsultation: (bookingId: string) => void
+  onStartConsultation: (bookingId: string, booking: Booking) => void
   onViewSchedule: () => void
 }
 
@@ -150,7 +151,7 @@ export function MedicDashboard({ onViewPatient, onStartConsultation, onViewSched
               </Button>
               <Button
                 size="sm"
-                onClick={() => onStartConsultation(nextBooking.id)}
+                onClick={() => onStartConsultation(nextBooking.id, nextBooking)}
               >
                 {nextBooking.consultationType === 'VIDEO' ? 'Join call' : 'Start consultation'}
               </Button>
@@ -246,7 +247,7 @@ export function MedicDashboard({ onViewPatient, onStartConsultation, onViewSched
                       <Button
                         size="sm"
                         className="h-7 text-xs"
-                        onClick={() => onStartConsultation(booking.id)}
+                        onClick={() => onStartConsultation(booking.id, booking)}
                       >
                         {booking.consultationType === 'VIDEO' ? 'Join' : 'Start'}
                       </Button>
