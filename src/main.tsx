@@ -6,7 +6,10 @@ import '@/styles/tokens.css'
 import '@/i18n'
 
 async function prepare() {
-  if (import.meta.env.DEV) {
+  // MSW is enabled in dev by default. Set VITE_MOCK_API=false in .env.local
+  // to bypass mocks and hit the real backend (needed for real Stripe testing).
+  const mockEnabled = import.meta.env.DEV && import.meta.env.VITE_MOCK_API !== 'false'
+  if (mockEnabled) {
     const { worker } = await import('./mocks/browser')
     await worker.start({
       onUnhandledRequest: 'bypass',

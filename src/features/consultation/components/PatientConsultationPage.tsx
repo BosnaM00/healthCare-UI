@@ -221,10 +221,12 @@ function Lobby({ booking, onJoin, isJoining }: LobbyProps) {
 interface ActiveCallProps {
   consultationId: string
   booking: Booking
+  roomUrl: string
+  token: string
   onBack: () => void
 }
 
-function ActiveCall({ consultationId, booking, onBack }: ActiveCallProps) {
+function ActiveCall({ consultationId, booking, roomUrl, token, onBack }: ActiveCallProps) {
   const { data: prescriptions = [] } = useConsultationPrescriptions(consultationId)
   const [callDuration, setCallDuration] = useState(0)
   const call = useDaily()
@@ -232,6 +234,12 @@ function ActiveCall({ consultationId, booking, onBack }: ActiveCallProps) {
   const isInCall = meetingState === 'joined-meeting'
 
   useDailyHeartbeat(consultationId, isInCall)
+
+  // Join the Daily.co room once the call object is ready
+  useEffect(() => {
+    if (!call) return
+    call.join({ url: roomUrl, ...(token ? { token } : {}) })
+  }, [call]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Navigate back when Daily fires left-meeting (triggered by call.leave() in the strip)
   useDailyEvent(
@@ -359,10 +367,11 @@ export function PatientConsultationPage({
   }
 
   const roomUrl = joinToken.data?.roomUrl ?? ''
-  const token = joinToken.data?.token
+  // token may be empty string for public rooms — treat undefined (not yet fetched) as absent
+  const token = joinToken.data?.token ?? ''
 
   // ── Pre-call lobby (no DailyProvider needed yet) ──────────────────────────
-  if (!joined || !roomUrl || !token) {
+  if (!joined || !roomUrl || joinToken.data === undefined) {
     return (
       <div className="flex flex-col">
         <div className="px-6 pt-4 shrink-0">
@@ -382,17 +391,19 @@ export function PatientConsultationPage({
     )
   }
 
-  // ── Active call — only mount DailyProvider once we have a real URL + token ─
+  // ── Active call — only mount DailyProvider once we have a real URL ─
   return (
     <DailyProvider
       url={roomUrl}
-      token={token}
+      {...(token ? { token } : {})}
       subscribeToTracksAutomatically
     >
       <div className="flex flex-col h-[calc(100vh-var(--topbar-height))]">
         <ActiveCall
           consultationId={consultationId}
           booking={booking}
+          roomUrl={roomUrl}
+          token={token}
           onBack={onBack}
         />
       </div>
