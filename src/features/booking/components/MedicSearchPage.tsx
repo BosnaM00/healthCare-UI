@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import { useMedics } from '../hooks/use-booking'
 import { MedicCard } from './MedicCard'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -24,14 +25,13 @@ export function MedicSearchPage({ onBook, onViewProfile }: MedicSearchPageProps)
   const [page, setPage] = useState(0)
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
-  const debounce = useCallback((value: string) => {
-    const timer = setTimeout(() => setDebouncedQuery(value), 350)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 350)
     return () => clearTimeout(timer)
-  }, [])
+  }, [query])
 
   const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value)
-    debounce(e.target.value)
     setPage(0)
   }
 
@@ -49,7 +49,7 @@ export function MedicSearchPage({ onBook, onViewProfile }: MedicSearchPageProps)
   ].filter(Boolean)
 
   return (
-    <div className="space-y-6">
+    <PageContainer className="space-y-6">
       <PageHeader
         title="Find a Doctor"
         description="Browse verified specialists and book your next consultation"
@@ -175,6 +175,6 @@ export function MedicSearchPage({ onBook, onViewProfile }: MedicSearchPageProps)
           </Button>
         </div>
       )}
-    </div>
+    </PageContainer>
   )
 }

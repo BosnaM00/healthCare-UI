@@ -35,3 +35,10 @@ export const useThemeStore = create<ThemeStore>()(
 
 // Init on first load
 applyTheme((localStorage.getItem('mc-theme') as Theme | null) ?? 'system')
+
+// Keep `system` mode in sync with OS-level appearance changes
+window
+  .matchMedia('(prefers-color-scheme: dark)')
+  .addEventListener('change', () => {
+    if (useThemeStore.getState().theme === 'system') applyTheme('system')
+  })

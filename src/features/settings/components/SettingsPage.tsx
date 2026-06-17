@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import {
   User, Bell, Shield, Globe, Palette, Lock, Download, Trash2,
-  CheckCircle2, AlertTriangle, ToggleLeft, ToggleRight, ChevronRight,
+  CheckCircle2, AlertTriangle,
+  Sun, Moon, Monitor, Contrast,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,14 @@ import { cn } from '@/lib/utils'
 import type { GdprConsent } from '@/types'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
+import { useThemeStore, type Theme } from '@/stores/theme.store'
+
+const THEME_OPTIONS: { value: Theme; label: string; desc: string; icon: React.ReactNode }[] = [
+  { value: 'light', label: 'Light', desc: 'Bright, high-clarity interface', icon: <Sun className="h-4 w-4" /> },
+  { value: 'dark', label: 'Dark', desc: 'Dimmed palette to reduce eye strain', icon: <Moon className="h-4 w-4" /> },
+  { value: 'high-contrast', label: 'High contrast', desc: 'Maximum legibility for accessibility', icon: <Contrast className="h-4 w-4" /> },
+  { value: 'system', label: 'System default', desc: 'Match your device appearance', icon: <Monitor className="h-4 w-4" /> },
+]
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 
@@ -398,23 +407,25 @@ function SecuritySection() {
 
 export function SettingsPage() {
   const [activeSection, setActiveSection] = useState<Section>('profile')
+  const theme = useThemeStore((s) => s.theme)
+  const setTheme = useThemeStore((s) => s.setTheme)
 
   const active = SECTIONS.find((s) => s.id === activeSection)
 
   return (
-    <div className="flex min-h-full">
-      {/* Left nav */}
+    <div className="flex min-h-full flex-col lg:flex-row">
+      {/* Section nav — horizontal scroll strip on mobile, vertical sidebar on desktop */}
       <nav
-        className="w-56 shrink-0 border-r border-[--color-border] py-4 px-2"
+        className="shrink-0 border-b border-[--color-border] p-2 lg:w-56 lg:border-b-0 lg:border-r"
         aria-label="Settings navigation"
       >
-        <ul className="space-y-0.5">
+        <ul className="flex gap-0.5 overflow-x-auto lg:flex-col lg:overflow-visible">
           {SECTIONS.map((s) => (
-            <li key={s.id}>
+            <li key={s.id} className="shrink-0 lg:shrink">
               <button
                 onClick={() => setActiveSection(s.id)}
                 className={cn(
-                  'w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-[--radius-md] text-sm transition-colors',
+                  'flex items-center gap-2.5 whitespace-nowrap rounded-[--radius-md] px-3 py-2 text-left text-sm transition-colors lg:w-full',
                   activeSection === s.id
                     ? 'bg-[--color-accent]/10 text-[--color-accent] font-medium'
                     : 'text-[--color-text-secondary] hover:bg-[--color-surface-raised] hover:text-[--color-text-primary]'
@@ -430,7 +441,7 @@ export function SettingsPage() {
       </nav>
 
       {/* Right content */}
-      <main className="flex-1 overflow-auto px-8 py-6 max-w-2xl">
+      <main className="flex-1 overflow-auto px-4 py-6 sm:px-6 lg:px-8 max-w-2xl">
         <h1 className="text-xl font-semibold text-[--color-text-primary] mb-1">{active?.label}</h1>
         <p className="text-sm text-[--color-text-secondary] mb-6">{active?.desc}</p>
 
@@ -480,18 +491,33 @@ export function SettingsPage() {
         )}
         {activeSection === 'appearance' && (
           <div className="space-y-3">
-            {[
-              { id: 'light', label: 'Light' },
-              { id: 'dark', label: 'Dark' },
-              { id: 'system', label: 'System default' },
-            ].map((theme) => (
-              <button
-                key={theme.id}
-                className="w-full text-left flex items-center justify-between px-4 py-3 rounded-[--radius-md] border border-[--color-border] hover:border-[--color-accent]/40 transition-colors"
-              >
-                <span className="text-sm text-[--color-text-primary]">{theme.label}</span>
-              </button>
-            ))}
+            {THEME_OPTIONS.map((opt) => {
+              const selected = theme === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setTheme(opt.value)}
+                  className={cn(
+                    'w-full text-left flex items-center gap-3 px-4 py-3 rounded-[--radius-md] border transition-colors',
+                    selected
+                      ? 'border-[--color-accent] bg-[--color-accent]/5'
+                      : 'border-[--color-border] hover:border-[--color-accent]/40'
+                  )}
+                  aria-pressed={selected}
+                >
+                  <span className={cn('shrink-0', selected ? 'text-[--color-accent]' : 'text-[--color-text-secondary]')}>
+                    {opt.icon}
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-medium text-[--color-text-primary]">{opt.label}</span>
+                    <span className="block text-xs text-[--color-text-secondary]">{opt.desc}</span>
+                  </span>
+                  {selected && (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-[--color-accent]" aria-hidden="true" />
+                  )}
+                </button>
+              )
+            })}
           </div>
         )}
       </main>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Calendar, Clock, Video, Search, FileText, ArrowRight, Stethoscope } from 'lucide-react'
+import { Calendar, Clock, Video, MapPin, Search, FileText, ArrowRight, Stethoscope } from 'lucide-react'
 import { useMyBookings } from '../hooks/use-booking'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { SkeletonCard } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/layout/EmptyState'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { useAuthStore } from '@/stores/auth.store'
 import type { Booking } from '@/types'
 import { cn } from '@/lib/utils'
@@ -47,7 +48,7 @@ export function PatientDashboard({ onFindMedic, onViewBooking }: PatientDashboar
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   return (
-    <div className="space-y-8">
+    <PageContainer className="space-y-8">
       <PageHeader
         title={`${greeting}, ${user?.firstName}!`}
         description="Here's an overview of your health journey"
@@ -132,7 +133,7 @@ export function PatientDashboard({ onFindMedic, onViewBooking }: PatientDashboar
           </div>
         </section>
       )}
-    </div>
+    </PageContainer>
   )
 }
 
@@ -194,7 +195,11 @@ function NextAppointmentHero({
             className="bg-white/20 text-white border-white/30 backdrop-blur-sm"
             variant="outline"
           >
-            {booking.consultationType === 'VIDEO' ? '🎥 Video' : '🏥 In-person'}
+            {booking.consultationType === 'VIDEO' ? (
+              <><Video className="h-3 w-3" aria-hidden="true" /> Video</>
+            ) : (
+              <><MapPin className="h-3 w-3" aria-hidden="true" /> In-person</>
+            )}
           </Badge>
 
           <div className="flex gap-2 flex-col sm:flex-row">
@@ -243,7 +248,12 @@ function BookingRow({ booking, onView }: { booking: Booking; onView?: (id: strin
       onClick={() => onView?.(booking.id)}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && onView?.(booking.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onView?.(booking.id)
+        }
+      }}
       aria-label={`Booking with Dr. ${medic?.firstName} ${medic?.lastName} on ${startTime.toLocaleDateString()}`}
     >
       <Avatar className="h-10 w-10 shrink-0">

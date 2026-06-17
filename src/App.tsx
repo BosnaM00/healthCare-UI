@@ -1,52 +1,64 @@
-import React, { useState } from 'react'
+import React, { useState, lazy, Suspense } from 'react'
 import { AbilityProvider } from '@/lib/can'
 import { AppShell } from '@/components/layout/AppShell'
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
+import { PageContainer } from '@/components/layout/PageContainer'
 
-// Auth
+// Auth — LoginPage stays eager (unauthenticated entry point, avoids a load flash).
 import { LoginPage } from '@/features/auth/components/LoginPage'
-import { MfaPage } from '@/features/auth/components/MfaPage'
-import { PasswordResetPage } from '@/features/auth/components/PasswordResetPage'
 
-// Patient
-import { RegisterPage } from '@/features/patient/components/RegisterPage'
-import { ProfileEditPage } from '@/features/patient/components/ProfileEditPage'
+// ── Lazily-loaded routes (code-split per feature). Components are named exports,
+//    so each import is mapped to a `default` for React.lazy. The consultation
+//    pages pull in the Daily.co SDK, which therefore loads only on demand. ──────
+const MfaPage = lazy(() => import('@/features/auth/components/MfaPage').then((m) => ({ default: m.MfaPage })))
+const PasswordResetPage = lazy(() => import('@/features/auth/components/PasswordResetPage').then((m) => ({ default: m.PasswordResetPage })))
 
-// Booking
-import { PatientDashboard } from '@/features/booking/components/PatientDashboard'
-import { MedicSearchPage } from '@/features/booking/components/MedicSearchPage'
-import { MedicProfilePage } from '@/features/booking/components/MedicProfilePage'
-import { BookingSheet } from '@/features/booking/components/BookingSheet'
-import { BookingDetailPage } from '@/features/booking/components/BookingDetailPage'
+const RegisterPage = lazy(() => import('@/features/patient/components/RegisterPage').then((m) => ({ default: m.RegisterPage })))
+const ProfileEditPage = lazy(() => import('@/features/patient/components/ProfileEditPage').then((m) => ({ default: m.ProfileEditPage })))
 
-// Payments (Stripe Connect)
-import { MedicOnboardingPage } from '@/features/payments/MedicOnboardingPage'
-import { MedicPayoutsPage } from '@/features/payments/MedicPayoutsPage'
-import { BookingResultPage } from '@/features/payments/BookingResultPage'
-import { env } from '@/env'
+const PatientDashboard = lazy(() => import('@/features/booking/components/PatientDashboard').then((m) => ({ default: m.PatientDashboard })))
+const MedicSearchPage = lazy(() => import('@/features/booking/components/MedicSearchPage').then((m) => ({ default: m.MedicSearchPage })))
+const MedicProfilePage = lazy(() => import('@/features/booking/components/MedicProfilePage').then((m) => ({ default: m.MedicProfilePage })))
+const BookingSheet = lazy(() => import('@/features/booking/components/BookingSheet').then((m) => ({ default: m.BookingSheet })))
+const BookingDetailPage = lazy(() => import('@/features/booking/components/BookingDetailPage').then((m) => ({ default: m.BookingDetailPage })))
 
-// Phase 2 — Medic
-import { MedicDashboard } from '@/features/medic/components/MedicDashboard'
-import { PatientDetailPage } from '@/features/medic/components/PatientDetailPage'
+const MedicOnboardingPage = lazy(() => import('@/features/payments/MedicOnboardingPage').then((m) => ({ default: m.MedicOnboardingPage })))
+const MedicPayoutsPage = lazy(() => import('@/features/payments/MedicPayoutsPage').then((m) => ({ default: m.MedicPayoutsPage })))
+const BookingResultPage = lazy(() => import('@/features/payments/BookingResultPage').then((m) => ({ default: m.BookingResultPage })))
 
-// Phase 2 — Consultation
-import { MedicConsultationWorkspace } from '@/features/consultation/components/MedicConsultationWorkspace'
-import { PatientConsultationPage } from '@/features/consultation/components/PatientConsultationPage'
+const MedicDashboard = lazy(() => import('@/features/medic/components/MedicDashboard').then((m) => ({ default: m.MedicDashboard })))
+const PatientDetailPage = lazy(() => import('@/features/medic/components/PatientDetailPage').then((m) => ({ default: m.PatientDetailPage })))
 
-// Phase 2 — Admin
-import { AdminDisputeQueue } from '@/features/admin/components/AdminDisputeQueue'
-import { AdminUserManagement } from '@/features/admin/components/AdminUserManagement'
-import { AuditLogViewer } from '@/features/admin/components/AuditLogViewer'
-import { DisputeFilingForm } from '@/features/admin/components/DisputeFilingForm'
+// Consultation — heaviest chunk (Daily.co video SDK), loaded only when a call starts.
+const MedicConsultationWorkspace = lazy(() => import('@/features/consultation/components/MedicConsultationWorkspace').then((m) => ({ default: m.MedicConsultationWorkspace })))
+const PatientConsultationPage = lazy(() => import('@/features/consultation/components/PatientConsultationPage').then((m) => ({ default: m.PatientConsultationPage })))
 
-// Phase 2 — Clinic
-import { ClinicManagerDashboard } from '@/features/clinic/components/ClinicManagerDashboard'
+const AdminDisputeQueue = lazy(() => import('@/features/admin/components/AdminDisputeQueue').then((m) => ({ default: m.AdminDisputeQueue })))
+const AdminUserManagement = lazy(() => import('@/features/admin/components/AdminUserManagement').then((m) => ({ default: m.AdminUserManagement })))
+const AuditLogViewer = lazy(() => import('@/features/admin/components/AuditLogViewer').then((m) => ({ default: m.AuditLogViewer })))
+const DisputeFilingForm = lazy(() => import('@/features/admin/components/DisputeFilingForm').then((m) => ({ default: m.DisputeFilingForm })))
 
-// Phase 2 — Settings
-import { SettingsPage } from '@/features/settings/components/SettingsPage'
+const ClinicManagerDashboard = lazy(() => import('@/features/clinic/components/ClinicManagerDashboard').then((m) => ({ default: m.ClinicManagerDashboard })))
+
+const SettingsPage = lazy(() => import('@/features/settings/components/SettingsPage').then((m) => ({ default: m.SettingsPage })))
 
 import { useAuthStore } from '@/stores/auth.store'
 import type { Booking, Medic, Slot } from '@/types'
+
+// Fallback shown while a lazily-loaded route chunk is fetched.
+function RouteFallback() {
+  return (
+    <PageContainer>
+      <div
+        className="flex items-center justify-center py-24 text-sm text-[--color-text-secondary]"
+        role="status"
+        aria-live="polite"
+      >
+        <span className="animate-pulse">Loading…</span>
+      </div>
+    </PageContainer>
+  )
+}
 
 // ── Simple client-side router ──────────────────────────────────────────────
 type Route =
@@ -107,27 +119,33 @@ export default function App() {
     if (route.id === 'register') {
       return (
         <ErrorBoundary>
-          <RegisterPage
-            onSuccess={() => setRoute({ id: 'dashboard' })}
-            onLogin={() => setRoute({ id: 'login' })}
-          />
+          <Suspense fallback={<RouteFallback />}>
+            <RegisterPage
+              onSuccess={() => setRoute({ id: 'dashboard' })}
+              onLogin={() => setRoute({ id: 'login' })}
+            />
+          </Suspense>
         </ErrorBoundary>
       )
     }
     if (route.id === 'mfa') {
       return (
         <ErrorBoundary>
-          <MfaPage
-            onSuccess={() => setRoute(defaultRoute())}
-            onBack={() => setRoute({ id: 'login' })}
-          />
+          <Suspense fallback={<RouteFallback />}>
+            <MfaPage
+              onSuccess={() => setRoute(defaultRoute())}
+              onBack={() => setRoute({ id: 'login' })}
+            />
+          </Suspense>
         </ErrorBoundary>
       )
     }
     if (route.id === 'password-reset') {
       return (
         <ErrorBoundary>
-          <PasswordResetPage onBack={() => setRoute({ id: 'login' })} />
+          <Suspense fallback={<RouteFallback />}>
+            <PasswordResetPage onBack={() => setRoute({ id: 'login' })} />
+          </Suspense>
         </ErrorBoundary>
       )
     }
@@ -305,7 +323,7 @@ export default function App() {
 
       case 'dispute-file':
         return (
-          <div className="px-6 py-8 max-w-xl">
+          <PageContainer size="narrow">
             <h1 className="text-xl font-semibold text-[--color-text-primary] mb-6">
               File a Dispute
             </h1>
@@ -314,7 +332,7 @@ export default function App() {
               onSuccess={() => setRoute({ id: 'dashboard' })}
               onCancel={() => setRoute({ id: 'dashboard' })}
             />
-          </div>
+          </PageContainer>
         )
 
       // ── Medic ─────────────────────────────────────────────────────────────
@@ -331,7 +349,7 @@ export default function App() {
 
       case 'medic-patients':
         return (
-          <div className="px-6 py-6">
+          <PageContainer>
             <h1 className="text-xl font-semibold text-[--color-text-primary] mb-4">Patients</h1>
             <p className="text-sm text-[--color-text-secondary]">
               Select a patient from your upcoming appointments to view their record.
@@ -344,7 +362,7 @@ export default function App() {
                 Maria Popescu → View record
               </button>
             </div>
-          </div>
+          </PageContainer>
         )
 
       case 'patient-detail':
@@ -409,7 +427,14 @@ export default function App() {
       <AbilityProvider>
         <AppShell onNavigate={navigate} currentPath={routeToPath(route)}>
           <ErrorBoundary>
-            {renderContent()}
+            <Suspense fallback={<RouteFallback />}>
+              <div
+                key={route.id}
+                className="animate-in fade-in-0 slide-in-from-bottom-1 duration-[--duration-normal]"
+              >
+                {renderContent()}
+              </div>
+            </Suspense>
           </ErrorBoundary>
         </AppShell>
       </AbilityProvider>

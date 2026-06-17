@@ -8,6 +8,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @import "tailwindcss";
+/* Enter/exit animation utilities (animate-in, fade-*, zoom-*, slide-*)
+   used by Radix overlays. Tailwind v4 successor to tailwindcss-animate. */
+@import "tw-animate-css";
 
 /* ── Light Theme (default) ──────────────────────────────────── */
 :root {
@@ -57,6 +60,7 @@
   --color-border-strong:     var(--color-neutral-300);
   --color-text-primary:      var(--color-neutral-900);
   --color-text-secondary:    var(--color-neutral-600);
+  --color-text-tertiary:     oklch(54% 0.010 240); /* darkened from neutral-500 (58%) for WCAG AA: 4.77:1 on bg, 5.05:1 on surface */
   --color-text-disabled:     var(--color-neutral-400);
   --color-text-inverse:      var(--color-neutral-0);
   --color-text-on-brand:     var(--color-neutral-0);
@@ -145,6 +149,7 @@
   --color-border-strong:     oklch(38% 0.008 240);
   --color-text-primary:      oklch(95% 0.003 240);
   --color-text-secondary:    oklch(72% 0.006 240);
+  --color-text-tertiary:     oklch(63% 0.008 240); /* lightened from 60% for WCAG AA on surface-raised: 4.95:1 */
   --color-text-disabled:     oklch(48% 0.006 240);
   --color-text-inverse:      oklch(10% 0.004 240);
   --color-text-on-brand:     oklch(100% 0 0);
@@ -170,6 +175,7 @@
   --color-border-strong:  oklch(0% 0 0);
   --color-text-primary:   oklch(0% 0 0);
   --color-text-secondary: oklch(0% 0 0);
+  --color-text-tertiary:  oklch(25% 0 0);
   --color-text-disabled:  oklch(30% 0 0);
   --color-accent:         oklch(20% 0.20 195);
   --color-accent-hover:   oklch(10% 0.15 195);
@@ -215,6 +221,16 @@ body {
   border-radius: var(--radius-sm);
 }
 
+/* Smooth theme switching — fade color tokens only (never layout).
+   Components with their own transition utilities override this; the
+   reduced-motion block above neutralizes it. */
+*, *::before, *::after {
+  transition:
+    background-color var(--duration-normal) var(--ease-default),
+    border-color var(--duration-normal) var(--ease-default),
+    color var(--duration-normal) var(--ease-default);
+}
+
 /* ── Tailwind theme extension ───────────────────────────────── */
 @theme {
   --font-ui:    var(--font-ui);
@@ -231,15 +247,35 @@ body {
   --color-brand-600: var(--color-brand-600);
   --color-brand-700: var(--color-brand-700);
 
-  --color-background:     var(--color-background);
-  --color-surface:        var(--color-surface);
-  --color-border:         var(--color-border);
-  --color-border-strong:  var(--color-border-strong);
-  --color-accent:         var(--color-accent);
-  --color-accent-hover:   var(--color-accent-hover);
-  --color-text-primary:   var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-text-disabled:  var(--color-text-disabled);
+  --color-background:      var(--color-background);
+  --color-surface:         var(--color-surface);
+  --color-surface-raised:  var(--color-surface-raised);
+  --color-surface-overlay: var(--color-surface-overlay);
+  --color-border:          var(--color-border);
+  --color-border-strong:   var(--color-border-strong);
+  --color-accent:          var(--color-accent);
+  --color-accent-hover:    var(--color-accent-hover);
+  --color-accent-active:   var(--color-accent-active);
+  --color-accent-subtle:   var(--color-accent-subtle);
+  --color-focus-ring:      var(--color-focus-ring);
+
+  --color-text-primary:    var(--color-text-primary);
+  --color-text-secondary:  var(--color-text-secondary);
+  --color-text-tertiary:   var(--color-text-tertiary);
+  --color-text-disabled:   var(--color-text-disabled);
+  --color-text-on-brand:   var(--color-text-on-brand);
+  --color-text-inverse:    var(--color-text-inverse);
+
+  /* Semantic — registered so bare utilities (text-danger, bg-info/10, …) generate */
+  --color-success:   var(--color-success);
+  --color-warning:   var(--color-warning);
+  --color-danger:    var(--color-danger);
+  --color-info:      var(--color-info);
+
+  /* Vital-specific */
+  --color-vital-ok:   var(--color-vital-ok);
+  --color-vital-mild: var(--color-vital-mild);
+  --color-vital-bad:  var(--color-vital-bad);
 
   --shadow-elev-0: var(--shadow-elev-0);
   --shadow-elev-1: var(--shadow-elev-1);

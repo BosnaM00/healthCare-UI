@@ -17,7 +17,15 @@ export function AppShell({ children, className, onNavigate, currentPath }: AppSh
 
   return (
     <div className="min-h-screen bg-[--color-background]">
-      <Topbar onMenuClick={() => setSidebarOpen(true)} />
+      {/* Skip to content — keyboard / screen-reader accessibility (WCAG 2.4.1) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-50 focus:rounded-[--radius-md] focus:bg-[--color-surface] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-[--color-text-primary] focus:shadow-[--shadow-elev-2] focus:outline-none focus:ring-2 focus:ring-[--color-focus-ring]"
+      >
+        Skip to main content
+      </a>
+
+      <Topbar onMenuClick={() => setSidebarOpen(true)} onNavigate={onNavigate} />
 
       <div className="flex">
         <Sidebar
@@ -38,6 +46,8 @@ export function AppShell({ children, className, onNavigate, currentPath }: AppSh
             className
           )}
           tabIndex={-1}
+          // Trap focus inside the mobile drawer by deactivating the content behind it
+          inert={sidebarOpen || undefined}
         >
           {children}
         </main>

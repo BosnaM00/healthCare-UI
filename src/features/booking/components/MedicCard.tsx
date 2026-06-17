@@ -23,7 +23,7 @@ export function MedicCard({ medic, onBook, onViewProfile, className }: MedicCard
   return (
     <article
       className={cn(
-        'rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface] p-4 shadow-[--shadow-elev-1] hover:shadow-[--shadow-elev-2] transition-shadow flex flex-col gap-4',
+        'rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface] p-4 shadow-[--shadow-elev-1] transition-[box-shadow,transform] duration-[--duration-normal] ease-[--ease-default] hover:-translate-y-0.5 hover:shadow-[--shadow-elev-2] flex flex-col gap-4',
         className
       )}
       aria-label={`Dr. ${medic.firstName} ${medic.lastName}`}

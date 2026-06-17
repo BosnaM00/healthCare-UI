@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { useMedicUpcomingBookings, useMedicEarningsSummary } from '../hooks/use-medic'
 import { useAuthStore } from '@/stores/auth.store'
 import type { Booking } from '@/types'
@@ -73,7 +74,7 @@ export function MedicDashboard({ onViewPatient, onStartConsultation, onViewSched
   const nextBooking = upcomingBookings[0]
 
   return (
-    <div className="px-6 py-6 space-y-6 max-w-5xl">
+    <PageContainer className="space-y-6">
       <PageHeader
         title={`Good ${getTimeOfDay()}, Dr. ${user?.lastName ?? ''}!`}
         description="Here's your overview for today."
@@ -259,7 +260,7 @@ export function MedicDashboard({ onViewPatient, onStartConsultation, onViewSched
           </ol>
         )}
       </div>
-    </div>
+    </PageContainer>
   )
 }
 

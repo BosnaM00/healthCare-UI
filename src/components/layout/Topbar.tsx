@@ -1,5 +1,5 @@
 import React from 'react'
-import { Bell, Moon, Sun, Monitor, Menu } from 'lucide-react'
+import { Bell, BellOff, Moon, Sun, Monitor, Menu, Contrast } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,16 +16,18 @@ import { cn } from '@/lib/utils'
 
 interface TopbarProps {
   onMenuClick?: () => void
+  onNavigate?: (path: string) => void
   className?: string
 }
 
 const themeOptions: { value: Theme; label: string; icon: React.ReactNode }[] = [
   { value: 'light', label: 'Light', icon: <Sun className="h-4 w-4" /> },
   { value: 'dark', label: 'Dark', icon: <Moon className="h-4 w-4" /> },
+  { value: 'high-contrast', label: 'High contrast', icon: <Contrast className="h-4 w-4" /> },
   { value: 'system', label: 'System', icon: <Monitor className="h-4 w-4" /> },
 ]
 
-export function Topbar({ onMenuClick, className }: TopbarProps) {
+export function Topbar({ onMenuClick, onNavigate, className }: TopbarProps) {
   const { user, clearAuth } = useAuthStore()
   const { theme, setTheme } = useThemeStore()
 
@@ -65,9 +67,24 @@ export function Topbar({ onMenuClick, className }: TopbarProps) {
       {/* Right */}
       <div className="flex items-center gap-2">
         {/* Notifications */}
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell className="h-5 w-5" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Notifications">
+              <Bell className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+              <BellOff className="h-8 w-8 text-[--color-text-tertiary]" aria-hidden="true" />
+              <p className="text-sm font-medium text-[--color-text-primary]">You're all caught up</p>
+              <p className="text-xs text-[--color-text-secondary]">
+                New notifications will appear here.
+              </p>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Theme switcher */}
         <DropdownMenu>
@@ -77,6 +94,8 @@ export function Topbar({ onMenuClick, className }: TopbarProps) {
                 <Moon className="h-5 w-5" />
               ) : theme === 'light' ? (
                 <Sun className="h-5 w-5" />
+              ) : theme === 'high-contrast' ? (
+                <Contrast className="h-5 w-5" />
               ) : (
                 <Monitor className="h-5 w-5" />
               )}
@@ -122,8 +141,8 @@ export function Topbar({ onMenuClick, className }: TopbarProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onNavigate?.('/profile')}>Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onNavigate?.('/settings')}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-[--color-danger] focus:text-[--color-danger]"

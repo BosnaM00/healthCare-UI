@@ -5,7 +5,6 @@ import {
   Calendar,
   Search,
   Users,
-  FileText,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -32,12 +31,10 @@ const NAV_ITEMS: NavItem[] = [
   // Common
   { label: 'Dashboard',      to: '/dashboard',      icon: <LayoutDashboard className="h-5 w-5" />, roles: ['PATIENT', 'MEDIC', 'CLINIC_MANAGER', 'ADMIN'] },
   // Patient
-  { label: 'My Bookings',    to: '/bookings',       icon: <Calendar className="h-5 w-5" />,        roles: ['PATIENT'] },
   { label: 'Find a Medic',   to: '/medics',         icon: <Search className="h-5 w-5" />,          roles: ['PATIENT'] },
   // Medic
   { label: 'My Schedule',    to: '/schedule',         icon: <Calendar className="h-5 w-5" />,        roles: ['MEDIC'] },
   { label: 'Patients',       to: '/patients',         icon: <Users className="h-5 w-5" />,           roles: ['MEDIC'] },
-  { label: 'Prescriptions',  to: '/prescriptions',    icon: <FileText className="h-5 w-5" />,        roles: ['MEDIC', 'PATIENT'] },
   { label: 'Payouts',        to: '/medic/payouts',    icon: <Wallet className="h-5 w-5" />,          roles: ['MEDIC'] },
   { label: 'Stripe Setup',   to: '/medic/onboarding', icon: <CreditCard className="h-5 w-5" />,      roles: ['MEDIC'] },
   // Clinic Manager
@@ -67,6 +64,16 @@ export function Sidebar({ open, onClose, className, onNavigate, currentPath, col
   const role = user?.role ?? 'PATIENT'
 
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role))
+
+  // Close the mobile drawer on Escape
+  React.useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose?.()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
 
   return (
     <>
