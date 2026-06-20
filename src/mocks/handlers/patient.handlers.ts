@@ -1,12 +1,69 @@
 import { http, HttpResponse, delay } from 'msw'
 import { mockUsers } from '../fixtures'
-import type { User } from '@/types'
+import type { User, Prescription } from '@/types'
 
 const BASE = 'http://localhost:8080/api/v1'
 
 const usersDB: User[] = [...mockUsers]
 
+const mockMyPrescriptions: Prescription[] = [
+  {
+    id: 'rx-101',
+    consultationId: 'consult-1',
+    patientId: 'usr-patient-1',
+    medicId: 'med-1',
+    issuedAt: new Date(Date.now() - 86400_000 * 3).toISOString(),
+    diagnosis: 'J06.9 – Acute upper respiratory infection, unspecified',
+    notes: 'Rest and adequate hydration recommended.',
+    medications: [
+      {
+        id: 'rxmed-1',
+        name: 'Amoxicillin',
+        dosage: '500',
+        unit: 'mg',
+        frequency: 'Three times daily',
+        durationDays: 7,
+        instructions: 'Take with food',
+      },
+      {
+        id: 'rxmed-2',
+        name: 'Paracetamol',
+        dosage: '500',
+        unit: 'mg',
+        frequency: 'As needed (max 4/day)',
+        durationDays: 5,
+      },
+    ],
+  },
+  {
+    id: 'rx-102',
+    consultationId: 'consult-0',
+    patientId: 'usr-patient-1',
+    medicId: 'med-2',
+    issuedAt: new Date(Date.now() - 86400_000 * 45).toISOString(),
+    diagnosis: 'I10 – Essential (primary) hypertension',
+    medications: [
+      {
+        id: 'rxmed-3',
+        name: 'Lisinopril',
+        dosage: '10',
+        unit: 'mg',
+        frequency: 'Once daily',
+        durationDays: 30,
+        instructions: 'Take in the morning',
+        interactionWarning: 'Avoid potassium supplements while taking this medication.',
+      },
+    ],
+  },
+]
+
 export const patientHandlers = [
+  // GET /prescriptions/my — patient's own prescriptions
+  http.get(`${BASE}/prescriptions/my`, async () => {
+    await delay(250)
+    return HttpResponse.json(mockMyPrescriptions)
+  }),
+
   // GET /patients/:id
   http.get(`${BASE}/patients/:id`, async ({ params }) => {
     await delay(200)

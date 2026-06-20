@@ -61,4 +61,37 @@ export const authHandlers = [
     if (!user) return HttpResponse.json({ status: 401 }, { status: 401 })
     return HttpResponse.json(user)
   }),
+
+  // POST /auth/google — mock Google authentication
+  http.post(`${BASE}/auth/google`, async ({ request }) => {
+    await delay(400)
+    const body = await request.json() as { idToken?: string }
+
+    // In dev/test mode, accept any non-empty token and return the first patient mock user
+    if (!body.idToken) {
+      return HttpResponse.json(
+        { type: 'about:blank', title: 'Bad Request', status: 400,
+          detail: 'Google ID token is required.' },
+        { status: 400 }
+      )
+    }
+
+    // Return a mock Google-authenticated patient user
+    const googleUser = mockUsers.find(u => u.role === 'PATIENT') ?? mockUsers[0]
+    if (!googleUser) {
+      return HttpResponse.json(
+        { type: 'about:blank', title: 'Internal Error', status: 500,
+          detail: 'No mock user available.' },
+        { status: 500 }
+      )
+    }
+    return HttpResponse.json({
+      token: `mock-google-jwt-token-${googleUser.id}`,
+      userId: googleUser.id,
+      role: googleUser.role,
+      email: googleUser.email,
+      firstName: googleUser.firstName,
+      lastName: googleUser.lastName,
+    })
+  }),
 ]

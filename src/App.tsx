@@ -17,6 +17,8 @@ const RegisterPage = lazy(() => import('@/features/patient/components/RegisterPa
 const ProfileEditPage = lazy(() => import('@/features/patient/components/ProfileEditPage').then((m) => ({ default: m.ProfileEditPage })))
 
 const PatientDashboard = lazy(() => import('@/features/booking/components/PatientDashboard').then((m) => ({ default: m.PatientDashboard })))
+const MyBookingsPage = lazy(() => import('@/features/booking/components/MyBookingsPage').then((m) => ({ default: m.MyBookingsPage })))
+const MyPrescriptionsPage = lazy(() => import('@/features/patient/components/MyPrescriptionsPage').then((m) => ({ default: m.MyPrescriptionsPage })))
 const MedicSearchPage = lazy(() => import('@/features/booking/components/MedicSearchPage').then((m) => ({ default: m.MedicSearchPage })))
 const MedicProfilePage = lazy(() => import('@/features/booking/components/MedicProfilePage').then((m) => ({ default: m.MedicProfilePage })))
 const BookingSheet = lazy(() => import('@/features/booking/components/BookingSheet').then((m) => ({ default: m.BookingSheet })))
@@ -69,6 +71,8 @@ type Route =
   | { id: 'register' }
   // Patient routes
   | { id: 'dashboard' }
+  | { id: 'my-bookings' }
+  | { id: 'my-prescriptions' }
   | { id: 'medics' }
   | { id: 'medic-profile'; medicId: string }
   | { id: 'booking-detail'; bookingId: string; booking?: Booking }
@@ -169,6 +173,12 @@ export default function App() {
       case '/medics':
         setRoute({ id: 'medics' })
         break
+      case '/bookings':
+        setRoute({ id: 'my-bookings' })
+        break
+      case '/prescriptions':
+        setRoute({ id: 'my-prescriptions' })
+        break
       case '/patients':
         setRoute({ id: 'medic-patients' })
         break
@@ -222,6 +232,17 @@ export default function App() {
             onViewBooking={(id) => setRoute({ id: 'booking-detail', bookingId: id })}
           />
         )
+
+      case 'my-bookings':
+        return (
+          <MyBookingsPage
+            onViewBooking={(id) => setRoute({ id: 'booking-detail', bookingId: id })}
+            onFindMedic={() => setRoute({ id: 'medics' })}
+          />
+        )
+
+      case 'my-prescriptions':
+        return <MyPrescriptionsPage />
 
       case 'medics':
         return (
@@ -445,6 +466,8 @@ export default function App() {
 function routeToPath(route: Route): string {
   switch (route.id) {
     case 'dashboard': return '/dashboard'
+    case 'my-bookings': return '/bookings'
+    case 'my-prescriptions': return '/prescriptions'
     case 'medics': return '/medics'
     case 'medic-profile': return '/medics'
     case 'booking-detail': return '/bookings'

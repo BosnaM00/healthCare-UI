@@ -5,6 +5,7 @@ import {
   Calendar,
   Search,
   Users,
+  FileText,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -32,6 +33,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard',      to: '/dashboard',      icon: <LayoutDashboard className="h-5 w-5" />, roles: ['PATIENT', 'MEDIC', 'CLINIC_MANAGER', 'ADMIN'] },
   // Patient
   { label: 'Find a Medic',   to: '/medics',         icon: <Search className="h-5 w-5" />,          roles: ['PATIENT'] },
+  { label: 'My Bookings',    to: '/bookings',       icon: <Calendar className="h-5 w-5" />,        roles: ['PATIENT'] },
+  { label: 'Prescriptions',  to: '/prescriptions',  icon: <FileText className="h-5 w-5" />,        roles: ['PATIENT'] },
   // Medic
   { label: 'My Schedule',    to: '/schedule',         icon: <Calendar className="h-5 w-5" />,        roles: ['MEDIC'] },
   { label: 'Patients',       to: '/patients',         icon: <Users className="h-5 w-5" />,           roles: ['MEDIC'] },

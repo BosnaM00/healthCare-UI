@@ -229,7 +229,7 @@ function NextAppointmentHero({
   )
 }
 
-function BookingRow({ booking, onView }: { booking: Booking; onView?: (id: string) => void }) {
+export function BookingRow({ booking, onView }: { booking: Booking; onView?: (id: string) => void }) {
   const startTime = new Date(booking.slot.startTime)
   const medic = booking.medic
   const isPast = startTime <= new Date()

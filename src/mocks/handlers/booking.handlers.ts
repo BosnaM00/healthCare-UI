@@ -47,8 +47,8 @@ export const bookingHandlers = [
     return HttpResponse.json(slots)
   }),
 
-  // GET /bookings (patient own bookings)
-  http.get(`${BASE}/bookings`, async () => {
+  // GET /bookings/my (patient own bookings) — must precede /bookings/:id
+  http.get(`${BASE}/bookings/my`, async () => {
     await delay(300)
     return HttpResponse.json({
       content: bookingsDB,

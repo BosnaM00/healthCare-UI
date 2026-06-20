@@ -8,6 +8,7 @@ import { FormField } from '@/components/forms/FormField'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { GoogleLoginButton } from './GoogleLoginButton'
 
 interface LoginPageProps {
   onSuccess?: () => void
@@ -155,6 +156,17 @@ export function LoginPage({ onSuccess, onForgotPassword, onRegister }: LoginPage
             </div>
           )}
 
+          {/* Google Sign-In — separator above */}
+          <div className="relative">
+            <Separator />
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[--color-background] px-2 text-xs text-[--color-text-secondary]">
+              or
+            </span>
+          </div>
+
+          <GoogleLoginButton onSuccess={onSuccess} />
+
+          {/* Register separator — separator below */}
           <div className="relative">
             <Separator />
             <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[--color-background] px-2 text-xs text-[--color-text-secondary]">

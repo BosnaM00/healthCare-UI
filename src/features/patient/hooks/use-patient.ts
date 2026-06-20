@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api-client'
 import { useAuthStore } from '@/stores/auth.store'
 import { toast } from '@/hooks/use-toast'
-import type { User } from '@/types'
+import type { User, Prescription } from '@/types'
 import type { PatientRegisterInput, PatientProfileInput } from '../schemas/patient.schema'
 
 interface RegisterResponse {
@@ -33,6 +33,13 @@ export function useRegisterPatient() {
         toast({ title: error.problem.title, description: error.problem.detail, variant: 'destructive' })
       }
     },
+  })
+}
+
+export function useMyPrescriptions() {
+  return useQuery({
+    queryKey: ['my-prescriptions'],
+    queryFn: () => api.get<Prescription[]>('/prescriptions/my'),
   })
 }
 
