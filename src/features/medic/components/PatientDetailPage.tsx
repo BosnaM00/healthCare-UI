@@ -12,6 +12,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { VitalsChart } from './VitalsChart'
 import { PatientTimeline } from './PatientTimeline'
 import { PrescriptionCard } from '@/features/consultation/components/PrescriptionCard'
+import { downloadPrescriptionPdf } from '@/features/consultation/hooks/use-consultation'
 import {
   usePatientDetail,
   usePatientVitals,
@@ -347,7 +348,7 @@ export function PatientDetailPage({ patientId, onBack, onStartConsultation }: Pa
                     key={rx.id}
                     prescription={rx}
                     onReissue={(id) => console.log('Reissue', id)}
-                    onDownloadPdf={(id) => console.log('PDF', id)}
+                    onDownloadPdf={downloadPrescriptionPdf}
                   />
                 ))
               )}

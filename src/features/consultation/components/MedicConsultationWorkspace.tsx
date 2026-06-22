@@ -22,6 +22,7 @@ import {
   useEndConsultation,
   useJoinToken,
   useDailyHeartbeat,
+  downloadPrescriptionPdf,
 } from '../hooks/use-consultation'
 import type { Booking } from '@/types'
 
@@ -282,7 +283,7 @@ function WorkspaceInner({
                   key={rx.id}
                   prescription={rx}
                   onReissue={(id) => console.log('Reissue', id)}
-                  onDownloadPdf={(id) => console.log('Download PDF', id)}
+                  onDownloadPdf={downloadPrescriptionPdf}
                 />
               ))}
             </TabsContent>

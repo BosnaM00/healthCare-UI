@@ -36,9 +36,16 @@ export function useMedic(id?: string) {
 }
 
 export function useMedicSlots(medicId?: string) {
+  const from = new Date()
+  const to = new Date()
+  to.setDate(to.getDate() + 30)
+  const fromParam = from.toISOString().slice(0, 10)
+  const toParam = to.toISOString().slice(0, 10)
+
   return useQuery({
-    queryKey: ['medic-slots', medicId],
-    queryFn: () => api.get<Slot[]>(`/medics/${medicId}/slots`),
+    queryKey: ['medic-slots', medicId, fromParam, toParam],
+    queryFn: () =>
+      api.get<Slot[]>(`/medics/${medicId}/slots?from=${fromParam}&to=${toParam}`),
     enabled: !!medicId,
   })
 }
@@ -65,6 +72,7 @@ export function useCreateBooking() {
   return useMutation({
     mutationFn: (data: {
       slotId: string
+      medicId: string
       consultationType: string
       cancellationPolicyAccepted: boolean
     }) => api.post<Booking>('/bookings', data),

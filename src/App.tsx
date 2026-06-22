@@ -29,6 +29,7 @@ const MedicPayoutsPage = lazy(() => import('@/features/payments/MedicPayoutsPage
 const BookingResultPage = lazy(() => import('@/features/payments/BookingResultPage').then((m) => ({ default: m.BookingResultPage })))
 
 const MedicDashboard = lazy(() => import('@/features/medic/components/MedicDashboard').then((m) => ({ default: m.MedicDashboard })))
+const MedicPatientsPage = lazy(() => import('@/features/medic/components/MedicPatientsPage').then((m) => ({ default: m.MedicPatientsPage })))
 const PatientDetailPage = lazy(() => import('@/features/medic/components/PatientDetailPage').then((m) => ({ default: m.PatientDetailPage })))
 
 // Consultation — heaviest chunk (Daily.co video SDK), loaded only when a call starts.
@@ -370,20 +371,9 @@ export default function App() {
 
       case 'medic-patients':
         return (
-          <PageContainer>
-            <h1 className="text-xl font-semibold text-[--color-text-primary] mb-4">Patients</h1>
-            <p className="text-sm text-[--color-text-secondary]">
-              Select a patient from your upcoming appointments to view their record.
-            </p>
-            <div className="mt-4">
-              <button
-                className="text-sm text-[--color-accent] hover:underline"
-                onClick={() => setRoute({ id: 'patient-detail', patientId: 'usr-patient-1' })}
-              >
-                Maria Popescu → View record
-              </button>
-            </div>
-          </PageContainer>
+          <MedicPatientsPage
+            onViewPatient={(patientId) => setRoute({ id: 'patient-detail', patientId })}
+          />
         )
 
       case 'patient-detail':

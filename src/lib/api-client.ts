@@ -47,9 +47,42 @@ async function request<T>(
   return res.json() as Promise<T>
 }
 
+/**
+ * Fetches a binary resource (e.g. a generated PDF) and triggers a browser download.
+ * Sends the auth token like {@link request} but reads the body as a Blob instead of JSON.
+ */
+async function download(path: string, filename: string): Promise<void> {
+  const token = useAuthStore.getState().token
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'GET',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+
+  if (!res.ok) {
+    let problem: ProblemDetail
+    try {
+      problem = (await res.json()) as ProblemDetail
+    } catch {
+      problem = { type: 'about:blank', title: res.statusText, status: res.status }
+    }
+    throw new ApiError(res.status, problem)
+  }
+
+  const blob = await res.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
 export const api = {
   get:    <T>(path: string, init?: RequestInit) =>
     request<T>(path, { ...init, method: 'GET' }),
+  download,
   post:   <T>(path: string, body?: unknown, init?: RequestInit) =>
     request<T>(path, { ...init, method: 'POST', body: JSON.stringify(body) }),
   put:    <T>(path: string, body?: unknown, init?: RequestInit) =>

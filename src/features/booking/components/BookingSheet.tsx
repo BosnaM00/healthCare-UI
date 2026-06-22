@@ -162,7 +162,8 @@ export function BookingSheet({
     createBooking.mutate(
       {
         slotId: slot.id,
-        consultationType: slot.consultationType,
+        medicId: medic.id,
+        consultationType: slot.consultationType ?? medic.consultationTypes?.[0] ?? 'VIDEO',
         cancellationPolicyAccepted: true,
       },
       {
@@ -391,4 +392,6 @@ export function BookingSheet({
       </div>
     </>
   )
+
+  return content
 }

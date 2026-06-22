@@ -20,7 +20,7 @@ export const paymentKeys = {
 export function useCreatePaymentIntent() {
   return useMutation({
     mutationFn: (bookingId: string) =>
-      api.post<PaymentIntentResponse>('/v1/payments/intents', { bookingId }),
+      api.post<PaymentIntentResponse>('/payments/intents', { bookingId }),
   })
 }
 
@@ -28,7 +28,7 @@ export function useCreatePaymentIntent() {
 export function usePayment(paymentId: string | null) {
   return useQuery({
     queryKey: paymentKeys.byId(paymentId ?? ''),
-    queryFn: () => api.get<Payment>(`/v1/payments/${paymentId}`),
+    queryFn: () => api.get<Payment>(`/payments/${paymentId}`),
     enabled: Boolean(paymentId),
   })
 }
@@ -38,7 +38,7 @@ export function useRefundPayment() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ paymentId, reason }: { paymentId: string; reason: string }) =>
-      api.post<Payment>(`/v1/payments/${paymentId}/refund`, { reason }),
+      api.post<Payment>(`/payments/${paymentId}/refund`, { reason }),
     onSuccess: (_, { paymentId }) => {
       qc.invalidateQueries({ queryKey: paymentKeys.byId(paymentId) })
     },
@@ -49,7 +49,7 @@ export function useRefundPayment() {
 export function useCreateOnboardingLink() {
   return useMutation({
     mutationFn: () =>
-      api.post<{ url: string }>('/v1/medics/me/stripe/onboarding'),
+      api.post<{ url: string }>('/medics/me/stripe/onboarding'),
   })
 }
 
@@ -57,7 +57,7 @@ export function useCreateOnboardingLink() {
 export function useMedicStripeStatus() {
   return useQuery({
     queryKey: paymentKeys.stripeStatus,
-    queryFn: () => api.get<MedicStripeStatus>('/v1/medics/me/stripe/status'),
+    queryFn: () => api.get<MedicStripeStatus>('/medics/me/stripe/status'),
     staleTime: 1000 * 30,
   })
 }
@@ -67,6 +67,6 @@ export function useMedicPayouts(page = 0) {
   return useQuery({
     queryKey: paymentKeys.payouts(page),
     queryFn: () =>
-      api.get<Page<PayoutRecord>>(`/v1/medics/me/payouts?page=${page}&size=20`),
+      api.get<Page<PayoutRecord>>(`/medics/me/payouts?page=${page}&size=20`),
   })
 }

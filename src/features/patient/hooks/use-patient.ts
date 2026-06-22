@@ -2,8 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '@/lib/api-client'
 import { useAuthStore } from '@/stores/auth.store'
 import { toast } from '@/hooks/use-toast'
-import type { User, Prescription } from '@/types'
+import type { User } from '@/types'
 import type { PatientRegisterInput, PatientProfileInput } from '../schemas/patient.schema'
+import {
+  parsePrescription,
+  type RawPrescription,
+} from '@/features/consultation/hooks/use-consultation'
 
 interface RegisterResponse {
   token: string
@@ -39,7 +43,12 @@ export function useRegisterPatient() {
 export function useMyPrescriptions() {
   return useQuery({
     queryKey: ['my-prescriptions'],
-    queryFn: () => api.get<Prescription[]>('/prescriptions/my'),
+    // Backend returns prescriptions as a `content` blob; parse each into the
+    // structured frontend shape (diagnosis, notes, medications) for rendering.
+    queryFn: async () => {
+      const raw = await api.get<RawPrescription[]>('/prescriptions/my')
+      return raw.map(parsePrescription)
+    },
   })
 }
 

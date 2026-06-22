@@ -6,7 +6,7 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { EmptyState } from '@/components/layout/EmptyState'
 import { SkeletonCard } from '@/components/ui/skeleton'
-import { toast } from '@/hooks/use-toast'
+import { downloadPrescriptionPdf } from '@/features/consultation/hooks/use-consultation'
 
 export function MyPrescriptionsPage() {
   const { data, isLoading } = useMyPrescriptions()
@@ -14,10 +14,6 @@ export function MyPrescriptionsPage() {
   const prescriptions = [...(data ?? [])].sort(
     (a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime()
   )
-
-  const handleDownloadPdf = () => {
-    toast({ title: 'Preparing download', description: 'Your prescription PDF will be ready shortly.' })
-  }
 
   return (
     <PageContainer className="space-y-6">
@@ -45,7 +41,7 @@ export function MyPrescriptionsPage() {
               key={rx.id}
               prescription={rx}
               compact
-              onDownloadPdf={handleDownloadPdf}
+              onDownloadPdf={downloadPrescriptionPdf}
             />
           ))}
         </div>
