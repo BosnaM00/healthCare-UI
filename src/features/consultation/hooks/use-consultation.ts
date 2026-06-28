@@ -163,6 +163,41 @@ export function useIssuePrescription(consultationId: string) {
   })
 }
 
+/** AI-inferred diagnosis suggestion returned by POST /prescriptions/infer-diagnosis. */
+export interface DiagnosisSuggestion {
+  diagnosis: string
+  reasoning: string
+  confidence: 'low' | 'medium' | 'high'
+  disclaimer: string
+  mock: boolean
+}
+
+/**
+ * Infers a likely diagnosis from a prescription's medications (AI decision-support).
+ * Stateless: nothing is persisted; the medic decides whether to act on the suggestion.
+ * MEDIC-only on the backend.
+ */
+export function useInferDiagnosis() {
+  return useMutation({
+    mutationFn: (medications: Prescription['medications']) =>
+      api.post<DiagnosisSuggestion>('/prescriptions/infer-diagnosis', {
+        medications: medications.map((m) => ({
+          name: m.name,
+          dosage: m.dosage,
+          unit: m.unit,
+          frequency: m.frequency,
+          durationDays: m.durationDays,
+        })),
+      }),
+    onError: () =>
+      toast({
+        title: 'Diagnosis suggestion failed',
+        description: 'Could not analyze the medications. Please try again.',
+        variant: 'destructive',
+      }),
+  })
+}
+
 export function useStartConsultation() {
   const qc = useQueryClient()
   return useMutation({

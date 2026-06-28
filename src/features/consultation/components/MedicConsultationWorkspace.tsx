@@ -284,6 +284,7 @@ function WorkspaceInner({
                   prescription={rx}
                   onReissue={(id) => console.log('Reissue', id)}
                   onDownloadPdf={downloadPrescriptionPdf}
+                  aiDiagnosis
                 />
               ))}
             </TabsContent>

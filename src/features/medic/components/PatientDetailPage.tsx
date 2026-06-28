@@ -349,6 +349,7 @@ export function PatientDetailPage({ patientId, onBack, onStartConsultation }: Pa
                     prescription={rx}
                     onReissue={(id) => console.log('Reissue', id)}
                     onDownloadPdf={downloadPrescriptionPdf}
+                    aiDiagnosis
                   />
                 ))
               )}

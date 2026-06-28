@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import {
   Pill, AlertTriangle, Printer, FileDown, Plus, Trash2, ChevronDown, ChevronUp,
+  Sparkles, Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +13,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormField } from '@/components/forms/FormField'
+import { useInferDiagnosis, type DiagnosisSuggestion } from '../hooks/use-consultation'
 
 // ─── Read-only Card ──────────────────────────────────────────────────────────
 interface PrescriptionCardProps {
@@ -19,6 +21,8 @@ interface PrescriptionCardProps {
   onReissue?: (id: string) => void
   onDownloadPdf?: (id: string) => void
   compact?: boolean
+  /** Show the "Suggest diagnosis (AI)" action — medic decision-support only. */
+  aiDiagnosis?: boolean
   className?: string
 }
 
@@ -27,9 +31,18 @@ export function PrescriptionCard({
   onReissue,
   onDownloadPdf,
   compact = false,
+  aiDiagnosis = false,
   className,
 }: PrescriptionCardProps) {
   const [expanded, setExpanded] = useState(!compact)
+  const [suggestion, setSuggestion] = useState<DiagnosisSuggestion | null>(null)
+  const inferDiagnosis = useInferDiagnosis()
+
+  const handleSuggest = () => {
+    inferDiagnosis.mutate(prescription.medications, {
+      onSuccess: (data) => setSuggestion(data),
+    })
+  }
 
   const issued = new Date(prescription.issuedAt).toLocaleDateString('ro-RO', {
     day: '2-digit', month: 'short', year: 'numeric',
@@ -81,6 +94,30 @@ export function PrescriptionCard({
                 Diagnosis
               </p>
               <p className="text-sm text-[--color-text-primary]">{prescription.diagnosis}</p>
+            </div>
+          )}
+
+          {suggestion && (
+            <div
+              className="mx-4 mt-3 rounded-[--radius-md] border border-[--color-accent] bg-[--color-surface-raised] p-3"
+              role="status"
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles className="h-3.5 w-3.5 text-[--color-accent]" aria-hidden="true" />
+                <span className="text-xs font-medium uppercase tracking-wide text-[--color-accent]">
+                  AI suggested diagnosis
+                </span>
+                <Badge variant="outline" className="text-[10px] ml-1">
+                  {suggestion.mock ? 'offline estimate' : `confidence: ${suggestion.confidence}`}
+                </Badge>
+              </div>
+              <p className="text-sm text-[--color-text-primary]">{suggestion.diagnosis}</p>
+              {suggestion.reasoning && (
+                <p className="text-xs text-[--color-text-secondary] mt-1">{suggestion.reasoning}</p>
+              )}
+              <p className="text-[11px] text-[--color-text-tertiary] mt-2 italic">
+                {suggestion.disclaimer}
+              </p>
             </div>
           )}
 
@@ -142,6 +179,22 @@ export function PrescriptionCard({
               <Printer className="h-3.5 w-3.5" aria-hidden="true" />
               Print
             </Button>
+            {aiDiagnosis && prescription.medications.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                onClick={handleSuggest}
+                disabled={inferDiagnosis.isPending}
+              >
+                {inferDiagnosis.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                {inferDiagnosis.isPending ? 'Analyzing…' : 'Suggest diagnosis (AI)'}
+              </Button>
+            )}
             {onReissue && (
               <Button
                 variant="outline"
